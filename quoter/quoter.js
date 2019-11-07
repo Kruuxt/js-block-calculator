@@ -168,7 +168,7 @@ window.onload = function() {
 		mouseY,
 		rect = canvas.getBoundingClientRect(),
 		width = canvas.width = 2261,
-		height = canvas.height = window.innerHeight/2,
+		height = canvas.height = window.innerHeight*(4/5),
 		brickArray = [],
 		selectedBrick = null;
 		brickArray[0] = new brick(SELECTERGAP, 5, new baseBrick(), true);
@@ -177,11 +177,11 @@ window.onload = function() {
 		brickArray[3] = new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true);
 		brickArray[4] = new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true);
 		brickArray[5] = new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true);
-		brickArray[6] = new brick(SELECTERGAP*7 + BRICKWIDTH*6, 5, new splitBrick(), true);
-		brickArray[7] = new brick(SELECTERGAP*8 + BRICKWIDTH*7, 5, new addBrick(), true);
-		brickArray[8] = new brick(SELECTERGAP*9 + BRICKWIDTH*8, 5, new subBrick(), true);
-		brickArray[9] = new brick(SELECTERGAP*10 + BRICKWIDTH*9, 5, new multBrick(), true);
-		brickArray[10] = new brick(SELECTERGAP*11 + BRICKWIDTH*10, 5, new divBrick(), true);
+		brickArray[6] = new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true);
+		brickArray[7] = new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true);
+		brickArray[8] = new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true);
+		brickArray[9] = new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true);
+		brickArray[10] = new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true);
 		let clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
 	draw();
@@ -240,35 +240,44 @@ window.onload = function() {
 		}
 	}
 
-
-
-	document.body.addEventListener("mousedown", function(event) {
-		updateMouse();
-		console.log("Mouse Clicked.");
+	function clickChecker(){
 		for(iterator = 0; iterator < brickArray.length; iterator++){
-			if(brickArray[iterator] != null && brickArray[iterator].posX < mouseX
-				 && brickArray[iterator].posX + BRICKWIDTH > mouseX
-				 && brickArray[iterator].posY < mouseY
-				 && brickArray[iterator].posY + BRICKHEIGHT > mouseY){
-					 console.log("Brick Clicked: ")
-					 if(brickArray[iterator].spawner === false){
-						if(brickArray[iterator].posX + BRICKWIDTH - XSIZE < mouseX
-							&& brickArray[iterator].posY + XSIZE > mouseY){
+			iBrick = brickArray[iterator];
+			if(iBrick != null && iBrick.posX < mouseX
+				 && iBrick.posX + BRICKWIDTH > mouseX
+				 && iBrick.posY < mouseY
+				 && iBrick.posY + BRICKHEIGHT > mouseY){
+					 console.log("Brick Clicked: ");
+					 if(iBrick.spawner === false){
+						if(iBrick.posX + BRICKWIDTH - XSIZE < mouseX
+							&& iBrick.posY + XSIZE > mouseY){
 							brickArray[iterator] = null;
 							selectedBrick = null;
 							console.log("Deleted brick: " + iterator);
 							break;
 							}
-						selectedBrick = brickArray[iterator];
+						selectedBrick = iBrick;
 						console.log("Selected brick: " + iterator);
 						xOff = mouseX - selectedBrick.posX;
 						yOff = mouseY - selectedBrick.posY;
 					 }else{
-						brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, brickArray[iterator].brickType, false);
+						brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, iBrick.brickType, false);
 						console.log("Spawned new brick: " + iterator);
 					}
 			}
 		}
+	}
+
+	function updateMouse(){
+		rect = canvas.getBoundingClientRect();
+		mouseX = event.clientX - rect.left;
+		mouseY = event.clientY - rect.top;
+	}
+
+	document.body.addEventListener("mousedown", function(event) {
+		updateMouse();
+		console.log("Mouse Clicked.");
+		clickChecker();
 		document.body.addEventListener("mousemove", onMouseMove);
 		draw();
 		document.body.addEventListener("mouseup", onMouseUp);
@@ -291,11 +300,5 @@ window.onload = function() {
 		selectedBrick = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
-	}
-
-	function updateMouse(){
-		rect = canvas.getBoundingClientRect();
-		mouseX = event.clientX - rect.left;
-		mouseY = event.clientY - rect.top;
 	}
 };
