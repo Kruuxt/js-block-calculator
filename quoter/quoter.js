@@ -102,7 +102,7 @@ class addBrick {
 class subBrick {
 	constructor() {
 		this.color = "yellow";
-		this.nodeIn = 1;
+		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Subtracter";
 		let val1 = "0",
@@ -117,7 +117,7 @@ class subBrick {
 class multBrick {
 	constructor() {
 		this.color = "yellow";
-		this.nodeIn = 1;
+		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Multiplier";
 		let val1 = "0",
@@ -132,7 +132,7 @@ class multBrick {
 class divBrick {
 	constructor() {
 		this.color = "yellow";
-		this.nodeIn = 1;
+		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Divider";
 		let val1 = "0",
@@ -158,7 +158,7 @@ window.onload = function() {
 	const BRICKWIDTH = 200,
 		BRICKHEIGHT = 50,
 		SELECTERGAP = 5,
-		NODEHEIGHT = 15,
+		NODEHEIGHT = 30,
 		NODEWIDTH = 15,
 		XSIZE=15;
 	//Define canvas elements
@@ -167,7 +167,7 @@ window.onload = function() {
 		mouseX,
 		mouseY,
 		rect = canvas.getBoundingClientRect(),
-		width = canvas.width = 2261,
+		width = canvas.width = 1235,
 		height = canvas.height = window.innerHeight*(4/5),
 		brickArray = [],
 		selectedBrick = null;
@@ -191,6 +191,7 @@ window.onload = function() {
 		for(iterator = 0; iterator < brickArray.length; iterator++){
 			iBrick = brickArray[iterator];
 			if(iBrick != null){
+				drawNodes(iBrick);
 				drawBrick(iBrick);
 				drawXBox(iBrick);
 				drawBrickInfo(iBrick);
@@ -213,17 +214,41 @@ window.onload = function() {
 		context.strokeRect(brickIn.posX, brickIn.posY, BRICKWIDTH,  BRICKHEIGHT);
 	}
 
+	function drawNodes(brickIn){
+		iNCount = brickIn.brickType.nodeIn;
+		oNCount = brickIn.brickType.nodeOut;
+		//Input nodes
+		if(iNCount > 0){
+			iNSpacing = BRICKWIDTH / (iNCount + 1);
+			for(counter = 0; counter < iNCount; counter++){
+				context.fillStyle = brickIn.brickType.color;
+				context.fillRect(brickIn.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+				context.fillStyle = "black";
+				context.strokeRect(brickIn.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+			}
+		}
+		//Output nodes
+		if(oNCount > 0){
+			oNSpacing = BRICKWIDTH / (oNCount + 1);
+			for(counter = 0; counter < oNCount; counter++){
+				context.fillStyle = brickIn.brickType.color;
+				context.fillRect(brickIn.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY + BRICKHEIGHT - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+				context.fillStyle = "black";
+				context.strokeRect(brickIn.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY + BRICKHEIGHT - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+			}
+		}
+	}
+
 	function drawBrickInfo(brickIn){
+		context.fillStyle = "black";
+		context.font = "15px Arial";
 		if(iBrick.spawner === false){
-			context.font = "15px Arial";
 			lineSpacing = BRICKHEIGHT / brickIn.brickType.displayedInfo.length;
 			for(i = 0; i < brickIn.brickType.displayedInfo.length; i++){
 				let wordSize = context.measureText(brickIn.brickType.displayedInfo[i]);
 				context.fillText(brickIn.brickType.displayedInfo[i], brickIn.posX + BRICKWIDTH/2 - wordSize.width/2, brickIn.posY + lineSpacing*(i)+15);
 			}
 		} else {
-			context.fillStyle = "black";
-			context.font = "15px Arial";
 			let textSize = context.measureText(brickIn.brickType.spawnText);
 			context.fillText(brickIn.brickType.spawnText, brickIn.posX + BRICKWIDTH/2 - textSize.width/2, brickIn.posY + BRICKHEIGHT/2);
 		}
