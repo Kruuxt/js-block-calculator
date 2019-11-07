@@ -8,8 +8,11 @@ window.onload = function() {
 	//Define canvas elements
 	let canvas = document.getElementById("canvas"),
 		context = canvas.getContext("2d"),
+		mouseX,
+		mouseY,
+		rect = canvas.getBoundingClientRect(),
 		width = canvas.width = window.innerWidth,
-		height = canvas.height = window.innerHeight;
+		height = canvas.height = window.innerHeight/2,
 		brickArray = [],
 		selectedBrick = null;
 		brickArray[0] = new brick(50, 50, new baseBrick(), true);
@@ -22,7 +25,6 @@ window.onload = function() {
 		context.clearRect(0, 0, width, height);
 		for(iterator = 0; iterator < brickArray.length; iterator++){
 			if(brickArray[iterator] != null){
-				console.log(selectedBrick != null);
 				context.fillStyle = brickArray[iterator].brickType.color;
 				context.beginPath();
 				context.rect(brickArray[iterator].posX, brickArray[iterator].posY, BRICKWIDTH,  BRICKHEIGHT);
@@ -32,6 +34,11 @@ window.onload = function() {
 					context.beginPath();
 					context.rect(brickArray[iterator].posX+BRICKWIDTH-XSIZE, brickArray[iterator].posY, XSIZE, XSIZE);
 					context.fill()
+				}else{
+					context.fillStyle = "black";
+					context.font = "15px Arial";
+					let textSize = context.measureText(brickArray[iterator].brickType.spawnText);
+					context.fillText(brickArray[iterator].brickType.spawnText, brickArray[iterator].posX + BRICKWIDTH/2 - textSize.width/2, brickArray[iterator].posY + BRICKHEIGHT/2)
 				}
 			}
 		}
@@ -41,21 +48,25 @@ window.onload = function() {
 		this.color = "gray";
 		this.nodeIn = 0;
 		this.nodeOut = 1;
+		this.spawnText = "Base Material";
 	}
 	function plateBrick(){
 		this.color = "blue";
 		this.nodeIn = 1;
 		this.nodeOut = 1;
+		this.spawnText = "Plating Layer";
 	}
 	function maskBrick(){
 		this.color = "green";
 		this.nodeIn = 1;
 		this.nodeOut = 1;
+		this.spawnText = "Mask/Unmask";
 	}
 	function qcBrick(){
 		this.color = "orange";
 		this.nodeIn = 1;
 		this.nodeOut = 1;
+		this.spawnText = "Quality Control";
 	}
 
 	function brick(posX, posY, brickType, spawner) {
@@ -67,23 +78,29 @@ window.onload = function() {
 
 
 	document.body.addEventListener("mousedown", function(event) {
+		updateMouse();
+		console.log("Mouse Clicked.");
 		for(iterator = 0; iterator < brickArray.length; iterator++){
-			if(brickArray[iterator] != null && brickArray[iterator].posX < event.clientX
-				 && brickArray[iterator].posX + BRICKWIDTH > event.clientX
-				 && brickArray[iterator].posY < event.clientY
-				 && brickArray[iterator].posY + BRICKHEIGHT > event.clientY){
+			if(brickArray[iterator] != null && brickArray[iterator].posX < mouseX
+				 && brickArray[iterator].posX + BRICKWIDTH > mouseX
+				 && brickArray[iterator].posY < mouseY
+				 && brickArray[iterator].posY + BRICKHEIGHT > mouseY){
+					 console.log("Brick Clicked: ")
 					 if(brickArray[iterator].spawner === false){
-						if(brickArray[iterator].posX + BRICKWIDTH - XSIZE < event.clientX
-							&& brickArray[iterator].posY + XSIZE > event.clientY){
+						if(brickArray[iterator].posX + BRICKWIDTH - XSIZE < mouseX
+							&& brickArray[iterator].posY + XSIZE > mouseY){
 							brickArray[iterator] = null;
 							selectedBrick = null;
+							console.log("Deleted brick: " + iterator);
 							break;
 							}
 						selectedBrick = brickArray[iterator];
-						xOff = event.clientX - selectedBrick.posX;
-						yOff = event.clientY - selectedBrick.posY;
+						console.log("Selected brick: " + iterator);
+						xOff = mouseX - selectedBrick.posX;
+						yOff = mouseY - selectedBrick.posY;
 					 }else{
-						brickArray[brickArray.length] = new brick(event.clientX-BRICKWIDTH/2, event.clientY-BRICKHEIGHT/2, brickArray[iterator].brickType, false);
+						brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, brickArray[iterator].brickType, false);
+						console.log("Spawned new brick: " + iterator);
 					}
 			}
 		}
@@ -93,17 +110,28 @@ window.onload = function() {
 	});
 
 	function onMouseMove(event) {
+		updateMouse();
+		console.log((mouseY + BRICKHEIGHT) + " <= " + rect.bottom + " = " + ((mouseY + BRICKHEIGHT) < rect.bottom));
 		if(selectedBrick != null){
-			selectedBrick.posX = event.clientX - xOff;
-			selectedBrick.posY = event.clientY - yOff;
-			draw();
+			if((mouseY + BRICKHEIGHT) < rect.bottom){
+				selectedBrick.posX = mouseX - xOff;
+				selectedBrick.posY = mouseY - yOff;
+				draw();
+			}
 		}
 	}
 
 	function onMouseUp(event) {
+		console.log("Deselected brick: " + selectedBrick);
 		selectedBrick = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
+	}
+
+	function updateMouse(){
+		rect = canvas.getBoundingClientRect();
+		mouseX = event.clientX - rect.left;
+		mouseY = event.clientY - rect.top;
 	}
 
 };
