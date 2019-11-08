@@ -146,10 +146,58 @@ class divBrick {
 
 class brick {
 	constructor(posX, posY, brickType, spawner) {
+		const BRICKWIDTH = 200,
+		BRICKHEIGHT = 50,
+		SELECTERGAP = 5,
+		NODEHEIGHT = 30,
+		NODEWIDTH = 15,
+		XSIZE=15;
+
 		this.posX = posX;
 		this.posY = posY;
 		this.brickType = brickType;
 		this.spawner = spawner;
+		this.nodeArray = [];
+		//Input nodes
+		if(brickType.nodeIn > 0){
+			let iNSpacing = BRICKWIDTH / (brickType.nodeIn + 1);
+			for(let counter = 0; counter < brickType.nodeIn; counter++){
+				this.nodeArray[this.nodeArray.length] = new Node(true, this,
+					posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), posY - (NODEHEIGHT/2), posX, posY);
+			}
+		}
+		//Output nodes
+		if(brickType.nodeOut > 0){
+			let oNSpacing = BRICKWIDTH / (brickType.nodeOut + 1);
+			for(let counter = 0; counter < brickType.nodeOut; counter++){
+				this.nodeArray[this.nodeArray.length] = new Node(false, this,
+					posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), posY + BRICKHEIGHT - (NODEHEIGHT/2), posX, posY);
+			}
+		}
+	}
+
+	updateNodes(){
+		for(i = 0; i < this.nodeArray.length; i++)
+			this.nodeArray[i].update();
+	}
+}
+
+class Node {
+	constructor(inNode, iBrick, posX, posY, startX, startY) {
+		this.inNode = inNode;
+		this.iBrick = iBrick;
+		this.posX = posX;
+		this.posY = posY;
+		this.startX = startX;
+		this.startY = startY;
+	}
+
+	update(){
+		console.log("updating nodes");
+		this.posX += iBrick.posX-this.startX;
+		this.startX = iBrick.posX;
+		this.posY += iBrick.posY-this.startY;
+		this.startY = iBrick.posY;
 	}
 }
 
@@ -215,26 +263,13 @@ window.onload = function() {
 	}
 
 	function drawNodes(brickIn){
-		iNCount = brickIn.brickType.nodeIn;
-		oNCount = brickIn.brickType.nodeOut;
-		//Input nodes
-		if(iNCount > 0){
-			iNSpacing = BRICKWIDTH / (iNCount + 1);
-			for(counter = 0; counter < iNCount; counter++){
+		for(boom = 0; boom < brickIn.nodeArray.length; boom++){
+			iNode = brickIn.nodeArray[boom];
+			if(iNode != undefined && iNode != null){
 				context.fillStyle = brickIn.brickType.color;
-				context.fillRect(brickIn.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+				context.fillRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
 				context.fillStyle = "black";
-				context.strokeRect(brickIn.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
-			}
-		}
-		//Output nodes
-		if(oNCount > 0){
-			oNSpacing = BRICKWIDTH / (oNCount + 1);
-			for(counter = 0; counter < oNCount; counter++){
-				context.fillStyle = brickIn.brickType.color;
-				context.fillRect(brickIn.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY + BRICKHEIGHT - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
-				context.fillStyle = "black";
-				context.strokeRect(brickIn.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), brickIn.posY + BRICKHEIGHT - (NODEHEIGHT/2), NODEWIDTH, NODEHEIGHT);
+				context.strokeRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
 			}
 		}
 	}
@@ -263,6 +298,13 @@ window.onload = function() {
 			context.font = "20px Arial";
 			context.fillText("x", brickIn.posX + BRICKWIDTH - XSIZE + 2, brickIn.posY - 1 + XSIZE);
 		}
+	}
+
+	function drawLine(x1, y1, x2, y2){
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2);
+		context.stroke();
 	}
 
 	function clickChecker(){
@@ -315,6 +357,7 @@ window.onload = function() {
 			if((mouseY + BRICKHEIGHT) < rect.bottom){
 				selectedBrick.posX = mouseX - xOff;
 				selectedBrick.posY = mouseY - yOff;
+				selectedBrick.updateNodes();
 				draw();
 			}
 		}
