@@ -1,3 +1,11 @@
+//Define constants
+const BRICKWIDTH = 200,
+	BRICKHEIGHT = 50,
+	SELECTERGAP = 5,
+	NODEHEIGHT = 30,
+	NODEWIDTH = 15,
+	XSIZE=15;
+
 class baseBrick {
 	constructor() {
 		this.color = "gray";
@@ -66,9 +74,9 @@ class totalBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 0;
 		this.spawnText = "Total";
-		let total = "0";
+		let vIn = "0";
 		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Total: $" + total);
+		this.displayedInfo[0] = ("Total: $" + vIn);
 	}
 }
 
@@ -78,9 +86,10 @@ class splitBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 2;
 		this.spawnText = "Splitter";
-		let value = "0";
+		let vIn = "0",
+			out = vIn;
 		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Value to split: " + value);
+		this.displayedInfo[0] = ("Value to split: " + vIn);
 	}
 }
 
@@ -146,13 +155,6 @@ class divBrick {
 
 class brick {
 	constructor(posX, posY, brickType, spawner) {
-		const BRICKWIDTH = 200,
-		BRICKHEIGHT = 50,
-		SELECTERGAP = 5,
-		NODEHEIGHT = 30,
-		NODEWIDTH = 15,
-		XSIZE=15;
-
 		this.posX = posX;
 		this.posY = posY;
 		this.brickType = brickType;
@@ -163,7 +165,7 @@ class brick {
 			let iNSpacing = BRICKWIDTH / (brickType.nodeIn + 1);
 			for(let counter = 0; counter < brickType.nodeIn; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(true, this,
-					posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), posY - (NODEHEIGHT/2), posX, posY);
+					this.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), this.posY - (NODEHEIGHT/2), this.posX, this.posY);
 			}
 		}
 		//Output nodes
@@ -171,13 +173,13 @@ class brick {
 			let oNSpacing = BRICKWIDTH / (brickType.nodeOut + 1);
 			for(let counter = 0; counter < brickType.nodeOut; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(false, this,
-					posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), posY + BRICKHEIGHT - (NODEHEIGHT/2), posX, posY);
+					this.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY);
 			}
 		}
 	}
 
 	updateNodes(){
-		for(i = 0; i < this.nodeArray.length; i++)
+		for(let i = 0; i < this.nodeArray.length; i++)
 			this.nodeArray[i].update();
 	}
 }
@@ -190,10 +192,58 @@ class Node {
 		this.posY = posY;
 		this.startX = startX;
 		this.startY = startY;
+		this.connectedNode = null;
+		this.value;
+	}
+
+	hitBox(){
+		if(this.inNode){
+			return{
+				x1: this.posX,
+				x2: this.posX+NODEWIDTH,
+				y1: this.posY,
+				y2: this.posY+NODEHEIGHT/2
+			};
+		}else{
+			return{
+				x1: this.posX,
+				x2: this.posX+NODEWIDTH,
+				y1: this.posY+NODEHEIGHT/2,
+				y2: this.posY+NODEHEIGHT
+			}
+		}
+	}
+
+	center(){
+		if(this.inNode){
+			return{
+				x: this.posX + NODEWIDTH/2,
+				y: this.posY + NODEHEIGHT/4
+			};
+		}else{
+			return{
+				x: this.posX + NODEWIDTH/2,
+				y: this.posY + 3*NODEHEIGHT/4
+			}
+		}
+	}
+
+	disconnect(){
+		this.connectedNode = null;
+	}
+
+	connect(otherNode){
+		if(otherNode.inNode != this.inNode){
+			this.connectedNode = otherNode;
+			if(this.inNode){
+				this.value = otherNode.value;
+			}
+		}else{
+			this.connectedNode = null;
+		}
 	}
 
 	update(){
-		console.log("updating nodes");
 		this.posX += iBrick.posX-this.startX;
 		this.startX = iBrick.posX;
 		this.posY += iBrick.posY-this.startY;
@@ -202,13 +252,6 @@ class Node {
 }
 
 window.onload = function() {
-	//Define constants
-	const BRICKWIDTH = 200,
-		BRICKHEIGHT = 50,
-		SELECTERGAP = 5,
-		NODEHEIGHT = 30,
-		NODEWIDTH = 15,
-		XSIZE=15;
 	//Define canvas elements
 	let canvas = document.getElementById("canvas"),
 		context = canvas.getContext("2d"),
@@ -218,7 +261,8 @@ window.onload = function() {
 		width = canvas.width = 1235,
 		height = canvas.height = window.innerHeight*(4/5),
 		brickArray = [],
-		selectedBrick = null;
+		selectedBrick = null,
+		selectedNode = null;
 		brickArray[0] = new brick(SELECTERGAP, 5, new baseBrick(), true);
 		brickArray[1] = new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true);
 		brickArray[2] = new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true);
@@ -256,6 +300,7 @@ window.onload = function() {
 	}
 
 	function drawBrick(brickIn){
+		context.lineWidth = 2;
 		context.fillStyle = brickIn.brickType.color;
 		context.fillRect(brickIn.posX, brickIn.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
@@ -263,6 +308,8 @@ window.onload = function() {
 	}
 
 	function drawNodes(brickIn){
+		context.lineWidth = 2;
+		brickIn.updateNodes();
 		for(boom = 0; boom < brickIn.nodeArray.length; boom++){
 			iNode = brickIn.nodeArray[boom];
 			if(iNode != undefined && iNode != null){
@@ -270,6 +317,9 @@ window.onload = function() {
 				context.fillRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
 				context.fillStyle = "black";
 				context.strokeRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
+				if(iNode.connectedNode != null && iNode.connectedNode != undefined){
+					line(iNode.center().x, iNode.center().y, iNode.connectedNode.center().x, iNode.connectedNode.center().y);
+				}
 			}
 		}
 	}
@@ -291,6 +341,7 @@ window.onload = function() {
 
 	function drawXBox(brickIn){
 		if(iBrick.spawner === false){
+			context.lineWidth = 2;
 			context.fillStyle = "red";
 			context.fillRect(brickIn.posX + BRICKWIDTH-XSIZE, brickIn.posY, XSIZE, XSIZE);
 			context.fillStyle = "black";
@@ -300,7 +351,7 @@ window.onload = function() {
 		}
 	}
 
-	function drawLine(x1, y1, x2, y2){
+	function line(x1, y1, x2, y2){
 		context.beginPath();
 		context.moveTo(x1, y1);
 		context.lineTo(x2, y2);
@@ -309,11 +360,20 @@ window.onload = function() {
 
 	function clickChecker(){
 		for(iterator = 0; iterator < brickArray.length; iterator++){
-			iBrick = brickArray[iterator];
-			if(iBrick != null && iBrick.posX < mouseX
-				 && iBrick.posX + BRICKWIDTH > mouseX
-				 && iBrick.posY < mouseY
-				 && iBrick.posY + BRICKHEIGHT > mouseY){
+			if(brickArray[iterator] != null && brickArray[iterator] != undefined)
+				iBrick = brickArray[iterator];
+			for(i = 0; i < iBrick.nodeArray.length; i++){
+				iNode = iBrick.nodeArray[i];
+				if(iNode != null && iNode != undefined
+					&& iNode.hitBox().x1 < mouseX && iNode.hitBox().x2 > mouseX
+					&& iNode.hitBox().y1 < mouseX && iNode.hitBox().y2 > mouseY){
+						console.log("Grabbed: " + iNode);
+						selectedNode = iNode;
+					}
+			}
+			if(iBrick != null && iBrick != undefined
+				&& iBrick.posX < mouseX && iBrick.posX + BRICKWIDTH > mouseX
+				&& iBrick.posY < mouseY && iBrick.posY + BRICKHEIGHT > mouseY){
 					 console.log("Brick Clicked: ");
 					 if(iBrick.spawner === false){
 						if(iBrick.posX + BRICKWIDTH - XSIZE < mouseX
@@ -352,7 +412,6 @@ window.onload = function() {
 
 	function onMouseMove(event) {
 		updateMouse();
-		console.log((mouseY + BRICKHEIGHT) + " <= " + rect.bottom + " = " + ((mouseY + BRICKHEIGHT) < rect.bottom));
 		if(selectedBrick != null){
 			if((mouseY + BRICKHEIGHT) < rect.bottom){
 				selectedBrick.posX = mouseX - xOff;
@@ -361,12 +420,39 @@ window.onload = function() {
 				draw();
 			}
 		}
+		if(selectedNode != null){
+			draw();
+			context.lineWidth = 5;
+			line(selectedNode.center().x, selectedNode.center().y, mouseX, mouseY);
+		}
 	}
 
 	function onMouseUp(event) {
+		updateMouse();
 		console.log("Deselected brick: " + selectedBrick);
 		selectedBrick = null;
+		if(selectedNode != null){
+			for(iterator = 0; iterator < brickArray.length; iterator++){
+				if(brickArray[iterator] != null && brickArray[iterator] != undefined)
+					iBrick = brickArray[iterator];
+				for(i = 0; i < iBrick.nodeArray.length; i++){
+					iNode = iBrick.nodeArray[i];
+					if(iNode != null && iNode != undefined
+						&& iNode.hitBox().x1 < mouseX && iNode.hitBox().x2 > mouseX
+						&& iNode.hitBox().y1 < mouseY && iNode.hitBox().y2 > mouseY){
+							console.log("Connected " + iNode + " & " + selectedNode);
+							console.log(iNode + selectedNode);
+							iNode.connect(selectedNode);
+							break;
+						} else {
+							selectedNode.disconnect();
+						}
+				}
+			}
+		}
+		selectedNode = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
+		draw();
 	}
 };
