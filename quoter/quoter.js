@@ -185,9 +185,9 @@ class brick {
 	}
 
 	updateBrick(){
-		for(let i = 0; i < this.nodeArray.length; i++)
+		for(i in this.nodeArray)
 			this.nodeArray[i].update();
-			this.xBox.update();
+		this.xBox.update();
 	}
 
 	checkClick(x, y){
@@ -218,6 +218,12 @@ class brick {
 		}
 	}
 
+	suicide(){
+		for(let iter in this.nodeArray){
+			this.nodeArray[iter].disconnect();
+		}
+	}
+
 }
 
 class xBox {
@@ -242,11 +248,11 @@ class xBox {
 	}
 
 	update(){
-		this.posX += iBrick.posX - this.startX;
-		this.startX = iBrick.posX;
-		this.posY += iBrick.posY - this.startY;
-		this.startY = iBrick.posY;
-	}
+		this.posX += this.iBrick.posX-this.startX;
+		this.startX = this.iBrick.posX;
+		this.posY += this.iBrick.posY-this.startY;
+		this.startY = this.iBrick.posY;
+}
 
 	checkClick(x, y){
 		if(this.posX < x && this.posX + XSIZE > x && this.posY < y && this.posY + XSIZE > y){
@@ -302,25 +308,25 @@ class Node {
 	}
 
 	disconnect(){
-		this.connectedNode = null;
-	}
-
-	connect(otherNode){
-		if(otherNode.inNode != this.inNode){
-			this.connectedNode = otherNode;
-			if(this.inNode){
-				this.value = otherNode.value;
-			}
-		}else{
+		if(this.connectedNode != null){
+			if(this.connectedNode.connectedNode != null)
+				this.connectedNode.connectedNode = null;
 			this.connectedNode = null;
 		}
 	}
 
+	connect(otherNode){
+		otherNode.disconnect();
+		console.log("connecting nodes.");
+		this.connectedNode = otherNode;
+		otherNode.connectedNode = this;
+	}
+
 	update(){
-		this.posX += iBrick.posX-this.startX;
-		this.startX = iBrick.posX;
-		this.posY += iBrick.posY-this.startY;
-		this.startY = iBrick.posY;
+			this.posX += this.iBrick.posX-this.startX;
+			this.startX = this.iBrick.posX;
+			this.posY += this.iBrick.posY-this.startY;
+			this.startY = this.iBrick.posY;
 	}
 
 	checkClick(x, y){
@@ -338,7 +344,11 @@ class Node {
 		context.fillStyle = "black";
 		context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
 		if(this.connectedNode != null && this.connectedNode != undefined){
-			line(this.findCenter().x, this.findCenter().y, this.connectedNode.findCenter().x, this.connectedNode.findCenter().y);
+			context.beginPath();
+			context.moveTo(this.findCenter().x, this.findCenter().y);
+			context.lineTo(this.connectedNode.findCenter().x, this.connectedNode.findCenter().y);
+			context.stroke();
+	
 		}
 	}
 }
@@ -371,8 +381,8 @@ window.onload = function() {
 
 	function draw() {
 		context.clearRect(0, 0, width, height);
-		for(iterator = 0; iterator < brickArray.length; iterator++){
-			iBrick = brickArray[iterator];
+		for(i in brickArray){
+			iBrick = brickArray[i];
 			if(iBrick != null){
 				iBrick.updateBrick();
 				iBrick.drawNodes(context);
@@ -390,34 +400,32 @@ window.onload = function() {
 	}
 
 	function clickChecker(){
-		for(iterator = 0; iterator < brickArray.length; iterator++){
-			if(brickArray[iterator] != null && brickArray[iterator] != undefined) 
-			iBrick = brickArray[iterator];
+		for(i in brickArray){
+			if(brickArray[i] != null && brickArray[i] != undefined) 
+			iBrick = brickArray[i];
 			if(iBrick.checkClick(mouseX, mouseY)){
-				console.log("Brick Clicked: ");
-					if(iBrick.spawner === false){
-					if(iBrick.xBox.checkClick(mouseX, mouseY)){
-						brickArray[iterator] = null;
-						selectedBrick = null;
-						console.log("Deleted brick: " + iterator);
-						break;
-						}
-					selectedBrick = iBrick;
-					console.log("Selected brick: " + iterator);
-					xOff = mouseX - selectedBrick.posX;
-					yOff = mouseY - selectedBrick.posY;
-					}else{
-					brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, iBrick.brickType, false);
-					console.log("Spawned new brick: " + iterator);
-					}
+				selectedBrick = iBrick;
+				xOff = mouseX - selectedBrick.posX;
+				yOff = mouseY - selectedBrick.posY;
+				if(iBrick.spawner){
+					selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
+						 mouseY-yOff, iBrick.brickType, false);
+				}
+				if(iBrick.xBox.checkClick(mouseX, mouseY)){
+					iBrick.suicide();
+					brickArray[i] = null;
+					selectedBrick = null;
+					break;
+				}
 			}
 			
-			for(i = 0; i < iBrick.nodeArray.length; i++){
+			for(i in iBrick.nodeArray){
 				iNode = iBrick.nodeArray[i];
 				if(iNode.checkClick(mouseX, mouseY)){
-						console.log("Grabbed: " + iNode);
 						selectedNode = iNode;
-					}
+						selectedNode.disconnect();
+						console.log("Selected node: " + selectedNode);
+				}
 			}
 		}
 	}
@@ -430,11 +438,10 @@ window.onload = function() {
 
 	document.body.addEventListener("mousedown", function(event) {
 		updateMouse();
-		console.log("Mouse Clicked.");
 		clickChecker();
 		document.body.addEventListener("mousemove", onMouseMove);
-		draw();
 		document.body.addEventListener("mouseup", onMouseUp);
+		draw();
 	});
 
 	function onMouseMove(event) {
@@ -456,27 +463,25 @@ window.onload = function() {
 
 	function onMouseUp(event) {
 		updateMouse();
-		console.log("Deselected brick: " + selectedBrick);
 		selectedBrick = null;
 		if(selectedNode != null){
-			for(iterator = 0; iterator < brickArray.length; iterator++){
-				if(brickArray[iterator] != null && brickArray[iterator] != undefined)
-					iBrick = brickArray[iterator];
-				for(i = 0; i < iBrick.nodeArray.length; i++){
-					iNode = iBrick.nodeArray[i];
-					if(iNode != null && iNode != undefined
-						&& iNode.hitBox().x1 < mouseX && iNode.hitBox().x2 > mouseX
-						&& iNode.hitBox().y1 < mouseY && iNode.hitBox().y2 > mouseY){
-							console.log("Connected " + iNode + " & " + selectedNode);
-							console.log(iNode + selectedNode);
-							iNode.connect(selectedNode);
-							break;
-						} else {
-							selectedNode.disconnect();
-						}
+			for(i in brickArray){
+				if(brickArray[i] != null && brickArray[i] != undefined){
+					iBrick = brickArray[i];
 				}
+				for(i in iBrick.nodeArray){
+					iNode = iBrick.nodeArray[i];
+					if(iNode != null && iNode != undefined && iNode.checkClick(mouseX, mouseY)
+					&& iNode.iBrick != selectedNode.iBrick && iNode.inNode != selectedNode.inNode){
+							selectedNode.connect(iNode);
+							selectedNode = null;
+							break;
+					}
+				}
+
 			}
 		}
+		if(selectedNode != null) selectedNode.disconnect();
 		selectedNode = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
@@ -485,7 +490,6 @@ window.onload = function() {
 
 	function clearScreen(){
 		for (iterator = 11; iterator < brickArray.length; iterator++){
-			console.log("clearing id: " + iterator);
 			brickArray[iterator] = null;
 		}
 		draw();
