@@ -160,6 +160,7 @@ class brick {
 		this.brickType = brickType;
 		this.spawner = spawner;
 		this.nodeArray = [];
+		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
 		//Input nodes
 		if(brickType.nodeIn > 0){
 			let iNSpacing = BRICKWIDTH / (brickType.nodeIn + 1);
@@ -178,9 +179,81 @@ class brick {
 		}
 	}
 
-	updateNodes(){
+	drawNodes(context){
+		for(let i = 0; i < this.nodeArray.length; i++)
+			this.nodeArray[i].draw(context);
+	}
+
+	updateBrick(){
 		for(let i = 0; i < this.nodeArray.length; i++)
 			this.nodeArray[i].update();
+			this.xBox.update();
+	}
+
+	checkClick(x, y){
+		if(this.posX < x && this.posX + BRICKWIDTH > x && this.posY < y && this.posY + BRICKHEIGHT > y){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	draw(context){
+		context.lineWidth = 2;
+		context.fillStyle = this.brickType.color;
+		context.fillRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
+		context.fillStyle = "black";
+		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
+		context.fillStyle = "black";
+		context.font = "15px Arial";
+		if(!this.spawner){
+			let lineSpacing = BRICKHEIGHT / this.brickType.displayedInfo.length;
+			for(i = 0; i < this.brickType.displayedInfo.length; i++){
+				let wordSize = context.measureText(this.brickType.displayedInfo[i]);
+				context.fillText(this.brickType.displayedInfo[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
+			}
+		} else {
+			let textSize = context.measureText(this.brickType.spawnText);
+			context.fillText(this.brickType.spawnText, this.posX + BRICKWIDTH/2 - textSize.width/2, this.posY + BRICKHEIGHT/2);
+		}
+	}
+
+}
+
+class xBox {
+	constructor(iBrick, posX, posY, startX, startY){
+		this.iBrick = iBrick,
+		this.posX = posX,
+		this.posY = posY,
+		this.startX = startX,
+		this.startY = startY;
+	}
+
+	draw(context){
+		if(!iBrick.spawner){
+			context.lineWidth = 2;
+			context.fillStyle = "red";
+			context.fillRect(this.posX, this.posY, XSIZE, XSIZE);
+			context.fillStyle = "black";
+			context.strokeRect(this.posX, this.posY, XSIZE, XSIZE);
+			context.font = "20px Arial";
+			context.fillText("x", this.posX + 3, this.posY - 2 + XSIZE);
+		}
+	}
+
+	update(){
+		this.posX += iBrick.posX - this.startX;
+		this.startX = iBrick.posX;
+		this.posY += iBrick.posY - this.startY;
+		this.startY = iBrick.posY;
+	}
+
+	checkClick(x, y){
+		if(this.posX < x && this.posX + XSIZE > x && this.posY < y && this.posY + XSIZE > y){
+			return true;
+		}else{
+			return false;
+		}
 	}
 }
 
@@ -214,7 +287,7 @@ class Node {
 		}
 	}
 
-	center(){
+	findCenter(){
 		if(this.inNode){
 			return{
 				x: this.posX + NODEWIDTH/2,
@@ -248,6 +321,25 @@ class Node {
 		this.startX = iBrick.posX;
 		this.posY += iBrick.posY-this.startY;
 		this.startY = iBrick.posY;
+	}
+
+	checkClick(x, y){
+		if(this.hitBox().x1 < x && this.hitBox().x2 > x && this.hitBox().y1 < y && this.hitBox().y2 > y){
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	draw(context){
+		context.lineWidth = 2;
+		context.fillStyle = this.iBrick.brickType.color;
+		context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+		context.fillStyle = "black";
+		context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+		if(this.connectedNode != null && this.connectedNode != undefined){
+			line(this.findCenter().x, this.findCenter().y, this.connectedNode.findCenter().x, this.connectedNode.findCenter().y);
+		}
 	}
 }
 
@@ -283,71 +375,11 @@ window.onload = function() {
 		for(iterator = 0; iterator < brickArray.length; iterator++){
 			iBrick = brickArray[iterator];
 			if(iBrick != null){
-				drawNodes(iBrick);
-				drawBrick(iBrick);
-				drawXBox(iBrick);
-				drawBrickInfo(iBrick);
+				iBrick.updateBrick();
+				iBrick.drawNodes(context);
+				iBrick.draw(context);
+				iBrick.xBox.draw(context);
 			}
-		}
-	}
-
-	function clearScreen(){
-		for (iterator = 11; iterator < brickArray.length; iterator++){
-			console.log("clearing id: " + iterator);
-			brickArray[iterator] = null;
-		}
-		draw();
-	}
-
-	function drawBrick(brickIn){
-		context.lineWidth = 2;
-		context.fillStyle = brickIn.brickType.color;
-		context.fillRect(brickIn.posX, brickIn.posY, BRICKWIDTH,  BRICKHEIGHT);
-		context.fillStyle = "black";
-		context.strokeRect(brickIn.posX, brickIn.posY, BRICKWIDTH,  BRICKHEIGHT);
-	}
-
-	function drawNodes(brickIn){
-		context.lineWidth = 2;
-		brickIn.updateNodes();
-		for(boom = 0; boom < brickIn.nodeArray.length; boom++){
-			iNode = brickIn.nodeArray[boom];
-			if(iNode != undefined && iNode != null){
-				context.fillStyle = brickIn.brickType.color;
-				context.fillRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
-				context.fillStyle = "black";
-				context.strokeRect(iNode.posX, iNode.posY, NODEWIDTH, NODEHEIGHT);
-				if(iNode.connectedNode != null && iNode.connectedNode != undefined){
-					line(iNode.center().x, iNode.center().y, iNode.connectedNode.center().x, iNode.connectedNode.center().y);
-				}
-			}
-		}
-	}
-
-	function drawBrickInfo(brickIn){
-		context.fillStyle = "black";
-		context.font = "15px Arial";
-		if(iBrick.spawner === false){
-			lineSpacing = BRICKHEIGHT / brickIn.brickType.displayedInfo.length;
-			for(i = 0; i < brickIn.brickType.displayedInfo.length; i++){
-				let wordSize = context.measureText(brickIn.brickType.displayedInfo[i]);
-				context.fillText(brickIn.brickType.displayedInfo[i], brickIn.posX + BRICKWIDTH/2 - wordSize.width/2, brickIn.posY + lineSpacing*(i)+15);
-			}
-		} else {
-			let textSize = context.measureText(brickIn.brickType.spawnText);
-			context.fillText(brickIn.brickType.spawnText, brickIn.posX + BRICKWIDTH/2 - textSize.width/2, brickIn.posY + BRICKHEIGHT/2);
-		}
-	}
-
-	function drawXBox(brickIn){
-		if(iBrick.spawner === false){
-			context.lineWidth = 2;
-			context.fillStyle = "red";
-			context.fillRect(brickIn.posX + BRICKWIDTH-XSIZE, brickIn.posY, XSIZE, XSIZE);
-			context.fillStyle = "black";
-			context.strokeRect(brickIn.posX + BRICKWIDTH-XSIZE - 1, brickIn.posY + 1, XSIZE, XSIZE);
-			context.font = "20px Arial";
-			context.fillText("x", brickIn.posX + BRICKWIDTH - XSIZE + 2, brickIn.posY - 1 + XSIZE);
 		}
 	}
 
@@ -360,36 +392,32 @@ window.onload = function() {
 
 	function clickChecker(){
 		for(iterator = 0; iterator < brickArray.length; iterator++){
-			if(brickArray[iterator] != null && brickArray[iterator] != undefined)
-				iBrick = brickArray[iterator];
-			for(i = 0; i < iBrick.nodeArray.length; i++){
-				iNode = iBrick.nodeArray[i];
-				if(iNode != null && iNode != undefined
-					&& iNode.hitBox().x1 < mouseX && iNode.hitBox().x2 > mouseX
-					&& iNode.hitBox().y1 < mouseX && iNode.hitBox().y2 > mouseY){
-						console.log("Grabbed: " + iNode);
-						selectedNode = iNode;
+			if(brickArray[iterator] != null && brickArray[iterator] != undefined) 
+			iBrick = brickArray[iterator];
+			if(iBrick.checkClick(mouseX, mouseY)){
+				console.log("Brick Clicked: ");
+					if(iBrick.spawner === false){
+					if(iBrick.xBox.checkClick(mouseX, mouseY)){
+						brickArray[iterator] = null;
+						selectedBrick = null;
+						console.log("Deleted brick: " + iterator);
+						break;
+						}
+					selectedBrick = iBrick;
+					console.log("Selected brick: " + iterator);
+					xOff = mouseX - selectedBrick.posX;
+					yOff = mouseY - selectedBrick.posY;
+					}else{
+					brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, iBrick.brickType, false);
+					console.log("Spawned new brick: " + iterator);
 					}
 			}
-			if(iBrick != null && iBrick != undefined
-				&& iBrick.posX < mouseX && iBrick.posX + BRICKWIDTH > mouseX
-				&& iBrick.posY < mouseY && iBrick.posY + BRICKHEIGHT > mouseY){
-					 console.log("Brick Clicked: ");
-					 if(iBrick.spawner === false){
-						if(iBrick.posX + BRICKWIDTH - XSIZE < mouseX
-							&& iBrick.posY + XSIZE > mouseY){
-							brickArray[iterator] = null;
-							selectedBrick = null;
-							console.log("Deleted brick: " + iterator);
-							break;
-							}
-						selectedBrick = iBrick;
-						console.log("Selected brick: " + iterator);
-						xOff = mouseX - selectedBrick.posX;
-						yOff = mouseY - selectedBrick.posY;
-					 }else{
-						brickArray[brickArray.length] = new brick(mouseX-BRICKWIDTH/2, mouseY-BRICKHEIGHT/2, iBrick.brickType, false);
-						console.log("Spawned new brick: " + iterator);
+			
+			for(i = 0; i < iBrick.nodeArray.length; i++){
+				iNode = iBrick.nodeArray[i];
+				if(iNode.checkClick(mouseX, mouseY)){
+						console.log("Grabbed: " + iNode);
+						selectedNode = iNode;
 					}
 			}
 		}
@@ -416,14 +444,14 @@ window.onload = function() {
 			if((mouseY + BRICKHEIGHT) < rect.bottom){
 				selectedBrick.posX = mouseX - xOff;
 				selectedBrick.posY = mouseY - yOff;
-				selectedBrick.updateNodes();
+				selectedBrick.updateBrick();
 				draw();
 			}
 		}
 		if(selectedNode != null){
 			draw();
 			context.lineWidth = 5;
-			line(selectedNode.center().x, selectedNode.center().y, mouseX, mouseY);
+			line(selectedNode.findCenter().x, selectedNode.findCenter().y, mouseX, mouseY);
 		}
 	}
 
@@ -453,6 +481,14 @@ window.onload = function() {
 		selectedNode = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
+		draw();
+	}
+
+	function clearScreen(){
+		for (iterator = 11; iterator < brickArray.length; iterator++){
+			console.log("clearing id: " + iterator);
+			brickArray[iterator] = null;
+		}
 		draw();
 	}
 };
