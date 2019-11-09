@@ -155,11 +155,11 @@ class divBrick {
 
 class brick {
 	constructor(posX, posY, brickType, spawner) {
-		this.posX = posX;
-		this.posY = posY;
-		this.brickType = brickType;
-		this.spawner = spawner;
-		this.nodeArray = [];
+		this.posX = posX,
+		this.posY = posY,
+		this.brickType = brickType,
+		this.spawner = spawner,
+		this.nodeArray = [],
 		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
 		//Input nodes
 		if(brickType.nodeIn > 0){
@@ -352,21 +352,20 @@ window.onload = function() {
 		rect = canvas.getBoundingClientRect(),
 		width = canvas.width = 1235,
 		height = canvas.height = window.innerHeight*(4/5),
-		brickArray = [],
+		brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true),
+			new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true),
+			new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true),
+			new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true),
+			new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true),
+			new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true),
+			new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true),
+			new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true),
+			new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true),
+			new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true),
+			new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true)],
 		selectedBrick = null,
-		selectedNode = null;
-		brickArray[0] = new brick(SELECTERGAP, 5, new baseBrick(), true);
-		brickArray[1] = new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true);
-		brickArray[2] = new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true);
-		brickArray[3] = new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true);
-		brickArray[4] = new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true);
-		brickArray[5] = new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true);
-		brickArray[6] = new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true);
-		brickArray[7] = new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true);
-		brickArray[8] = new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true);
-		brickArray[9] = new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true);
-		brickArray[10] = new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true);
-		let clearScreenButton = document.getElementById("sCButton");
+		selectedNode = null,
+		clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
 	draw();
 
