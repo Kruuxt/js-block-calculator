@@ -219,8 +219,20 @@ class brick {
 	}
 
 	suicide(){
-		for(let iter in this.nodeArray){
-			this.nodeArray[iter].disconnect();
+		for(let i in this.nodeArray){
+			this.nodeArray[i].disconnect();
+		}
+	}
+
+	drawNodeLines(context){
+		for(let i in this.nodeArray){
+			let iNode = this.nodeArray[i];
+			if(iNode.connectedNode != null && iNode.connectedNode != undefined){
+				context.beginPath();
+				context.moveTo(iNode.findCenter().x, iNode.findCenter().y);
+				context.lineTo(iNode.connectedNode.findCenter().x, iNode.connectedNode.findCenter().y);
+				context.stroke();
+			}
 		}
 	}
 
@@ -343,13 +355,6 @@ class Node {
 		context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
 		context.fillStyle = "black";
 		context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
-		if(this.connectedNode != null && this.connectedNode != undefined){
-			context.beginPath();
-			context.moveTo(this.findCenter().x, this.findCenter().y);
-			context.lineTo(this.connectedNode.findCenter().x, this.connectedNode.findCenter().y);
-			context.stroke();
-	
-		}
 	}
 }
 
@@ -385,6 +390,7 @@ window.onload = function() {
 			iBrick = brickArray[i];
 			if(iBrick != null){
 				iBrick.updateBrick();
+				iBrick.drawNodeLines(context);
 				iBrick.drawNodes(context);
 				iBrick.draw(context);
 				iBrick.xBox.draw(context);
