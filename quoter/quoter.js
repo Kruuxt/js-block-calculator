@@ -12,10 +12,18 @@ class baseBrick {
 		this.nodeIn = 0;
 		this.nodeOut = 1;
 		this.spawnText = "Base Material";
-		let baseMaterial = "copper", surfaceArea = "123";
+		let baseMaterial = "copper",
+		surfaceArea = 123;
+		this.vIn = [];
+		this.out = [];
 		this.displayedInfo = [];
 		this.displayedInfo[0] = ("Base Mat.: " + baseMaterial);
 		this.displayedInfo[1] = ("S.A.: " + surfaceArea);
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Base Mat.: " + this.baseMaterial), ("S.A.: " + this.surfaceArea)];
+		return this.displayedInfo;
 	}
 }
 
@@ -25,9 +33,14 @@ class maskBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Mask/Unmask";
-		let timeReq = "10";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Mask Time Req.: " + timeReq + "m");
+		let timeReq = 10;
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Mask Time Req.: " + this.timeReq + "m")];
+		return this.displayedInfo;
 	}
 }
 
@@ -37,9 +50,14 @@ class rackBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Rack/Unrack";
-		let timeReq = "10";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Rack Time Req.: " + timeReq + "m");
+		let timeReq = 10;
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Rack Time Req.: " + this.timeReq + "m")];
+		return this.displayedInfo;
 	}
 }
 
@@ -49,10 +67,15 @@ class plateBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Plating Layer";
-		let plateMat = "copper", depth = "0.00005";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Plate Mat.: " + plateMat);
-		this.displayedInfo[1] = ("Depth: " + depth);
+		this.plateMat = "copper";
+		this.depth = 0.00005;
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Plate Mat.: " + plateMat), ("Depth: " + depth)];
+		return this.displayedInfo;
 	}
 }
 
@@ -62,9 +85,14 @@ class qcBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Quality Control";
-		let timeReq = "10";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("QC Time Req.: " + timeReq + "m");
+		let timeReq = 10;
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("QC Time Req.: " + this.timeReq + "m")];
+		return this.displayedInfo;
 	}
 }
 
@@ -74,9 +102,13 @@ class totalBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 0;
 		this.spawnText = "Total";
-		let vIn = "0";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Total: $" + vIn);
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Total: $" + this.vIn[0])];
+		return this.displayedInfo;
 	}
 }
 
@@ -86,10 +118,13 @@ class splitBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 2;
 		this.spawnText = "Splitter";
-		let vIn = "0",
-			out = vIn;
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Value to split: " + vIn);
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [("Value to split: " + vIn[0]), this.out];
+		return this.displayedInfo;
 	}
 }
 
@@ -99,12 +134,13 @@ class addBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Adder";
-		let val1 = "0",
-		val2 = "1",
-		out = val1+val2;
-		this.displayedInfo = [];
-		this.displayedInfo[0] = (val1 + " + " + val2 + " =");
-		this.displayedInfo[1] = out;
+		this.vIn = [];
+		this.out = [];
+	}
+	
+	generateString(){
+		this.displayedInfo = [(this.vIn[0] + " + " + this.vIn[1] + " ="), this.out];
+		return this.displayedInfo;
 	}
 }
 
@@ -114,12 +150,13 @@ class subBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Subtracter";
-		let val1 = "0",
-		val2 = "1",
-		out = val1-val2;
-		this.displayedInfo = [];
-		this.displayedInfo[0] = (val1 + " - " + val2 + " =");
-		this.displayedInfo[1] = out;
+		this.vIn = [];
+		this.out = [];
+	}
+
+	generateString(){
+		this.displayedInfo = [(this.vIn[0] + " - " + this.vIn[1] + " ="), this.out];
+		return this.displayedInfo;
 	}
 }
 
@@ -129,12 +166,13 @@ class multBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Multiplier";
-		let val1 = "0",
-		val2 = "1",
-		out = val1*val2;
-		this.displayedInfo = [];
-		this.displayedInfo[0] = (val1 + " x " + val2 + " =");
-		this.displayedInfo[1] = out;
+		this.vIn = [];
+		this.out = [];
+	}
+
+	generateString(){
+		this.displayedInfo = [(this.vIn[0] + " x " + this.vIn[1] + " ="), this.out];
+		return this.displayedInfo;
 	}
 }
 
@@ -161,20 +199,27 @@ class brick {
 		this.spawner = spawner,
 		this.nodeArray = [],
 		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
+		this.initializeNodes();
+	}
+
+
+	initializeNodes(){
 		//Input nodes
-		if(brickType.nodeIn > 0){
-			let iNSpacing = BRICKWIDTH / (brickType.nodeIn + 1);
-			for(let counter = 0; counter < brickType.nodeIn; counter++){
+		if(this.brickType.nodeIn > 0){
+			let iNSpacing = BRICKWIDTH / (this.brickType.nodeIn + 1);
+			for(let counter = 0; counter < this.brickType.nodeIn; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(true, this,
-					this.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2), this.posY - (NODEHEIGHT/2), this.posX, this.posY);
+					this.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2),
+					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter, 10);
 			}
 		}
 		//Output nodes
-		if(brickType.nodeOut > 0){
-			let oNSpacing = BRICKWIDTH / (brickType.nodeOut + 1);
-			for(let counter = 0; counter < brickType.nodeOut; counter++){
+		if(this.brickType.nodeOut > 0){
+			let oNSpacing = BRICKWIDTH / (this.brickType.nodeOut + 1);
+			for(let counter = 0; counter < this.brickType.nodeOut; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(false, this,
-					this.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2), this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY);
+					this.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2),
+					 this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY, counter, 10);
 			}
 		}
 	}
@@ -208,7 +253,7 @@ class brick {
 		context.font = "15px Arial";
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.displayedInfo.length;
-			for(i = 0; i < this.brickType.displayedInfo.length; i++){
+			for(i = 0; i < this.brickType.displayedInfo.generateString(); i++){
 				let wordSize = context.measureText(this.brickType.displayedInfo[i]);
 				context.fillText(this.brickType.displayedInfo[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
 			}
@@ -227,6 +272,7 @@ class brick {
 	drawNodeLines(context){
 		for(let i in this.nodeArray){
 			let iNode = this.nodeArray[i];
+			context.lineWidth = 2;
 			if(iNode.connectedNode != null && iNode.connectedNode != undefined){
 				context.beginPath();
 				context.moveTo(iNode.findCenter().x, iNode.findCenter().y);
@@ -276,7 +322,7 @@ class xBox {
 }
 
 class Node {
-	constructor(inNode, iBrick, posX, posY, startX, startY) {
+	constructor(inNode, iBrick, posX, posY, startX, startY, id, defVal) {
 		this.inNode = inNode;
 		this.iBrick = iBrick;
 		this.posX = posX;
@@ -284,7 +330,9 @@ class Node {
 		this.startX = startX;
 		this.startY = startY;
 		this.connectedNode = null;
+		this.id = id;
 		this.value;
+		this.defVal = defVal;
 	}
 
 	hitBox(){
@@ -324,6 +372,10 @@ class Node {
 			if(this.connectedNode.connectedNode != null)
 				this.connectedNode.connectedNode = null;
 			this.connectedNode = null;
+			this.value = null;
+			this.iBrick.brickType.vIn[this.id] = this.defVal;
+			this.connectedNode.iBrick.brickType.vIn[this.connectedNode.id] = this.connectedNode.defVal; 
+			this.connectedNode.connectedNode.iBrick.brickType.vIn[this.connectedNode.connectedNode.id] = this.connectedNode.connectedNode.defVal; 
 		}
 	}
 
@@ -332,6 +384,11 @@ class Node {
 		console.log("connecting nodes.");
 		this.connectedNode = otherNode;
 		otherNode.connectedNode = this;
+		if(this.inNode){
+			this.value = this.connectedNode.value;
+		}else{
+			this.connectedNode.value = this.value;
+		}
 	}
 
 	update(){
@@ -387,10 +444,12 @@ window.onload = function() {
 	function draw() {
 		context.clearRect(0, 0, width, height);
 		for(i in brickArray){
+			if(brickArray[i] != null) brickArray[i].drawNodeLines(context);
+		}
+		for(i in brickArray){
 			iBrick = brickArray[i];
 			if(iBrick != null){
 				iBrick.updateBrick();
-				iBrick.drawNodeLines(context);
 				iBrick.drawNodes(context);
 				iBrick.draw(context);
 				iBrick.xBox.draw(context);
