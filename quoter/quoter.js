@@ -14,16 +14,14 @@ class baseBrick {
 		this.spawnText = "Base Material";
 		let baseMaterial = "copper",
 		surfaceArea = 123;
-		this.vIn = [];
-		this.out = [];
 		this.displayedInfo = [];
 		this.displayedInfo[0] = ("Base Mat.: " + baseMaterial);
 		this.displayedInfo[1] = ("S.A.: " + surfaceArea);
 	}
 	
 	generateString(){
-		this.displayedInfo = [("Base Mat.: " + this.baseMaterial), ("S.A.: " + this.surfaceArea)];
-		return this.displayedInfo;
+		let displayedInfo = [("Base Mat.: " + this.baseMaterial), ("S.A.: " + this.surfaceArea)];
+		return displayedInfo;
 	}
 }
 
@@ -34,13 +32,11 @@ class maskBrick {
 		this.nodeOut = 1;
 		this.spawnText = "Mask/Unmask";
 		let timeReq = 10;
-		this.vIn = [];
-		this.out = [];
 	}
 	
 	generateString(){
-		this.displayedInfo = [("Mask Time Req.: " + this.timeReq + "m")];
-		return this.displayedInfo;
+		let displayedInfo = [("Mask Time Req.: " + this.timeReq + "m")];
+		return displayedInfo;
 	}
 }
 
@@ -51,13 +47,11 @@ class rackBrick {
 		this.nodeOut = 1;
 		this.spawnText = "Rack/Unrack";
 		let timeReq = 10;
-		this.vIn = [];
-		this.out = [];
 	}
 	
 	generateString(){
-		this.displayedInfo = [("Rack Time Req.: " + this.timeReq + "m")];
-		return this.displayedInfo;
+		let displayedInfo = [("Rack Time Req.: " + this.timeReq + "m")];
+		return displayedInfo;
 	}
 }
 
@@ -69,13 +63,11 @@ class plateBrick {
 		this.spawnText = "Plating Layer";
 		this.plateMat = "copper";
 		this.depth = 0.00005;
-		this.vIn = [];
-		this.out = [];
 	}
 	
 	generateString(){
-		this.displayedInfo = [("Plate Mat.: " + plateMat), ("Depth: " + depth)];
-		return this.displayedInfo;
+		let displayedInfo = [("Plate Mat.: " + this.plateMat), ("Depth: " + this.depth)];
+		return displayedInfo;
 	}
 }
 
@@ -86,13 +78,11 @@ class qcBrick {
 		this.nodeOut = 1;
 		this.spawnText = "Quality Control";
 		let timeReq = 10;
-		this.vIn = [];
-		this.out = [];
 	}
 	
 	generateString(){
-		this.displayedInfo = [("QC Time Req.: " + this.timeReq + "m")];
-		return this.displayedInfo;
+		let displayedInfo = [("QC Time Req.: " + this.timeReq + "m")];
+		return displayedInfo;
 	}
 }
 
@@ -102,13 +92,11 @@ class totalBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 0;
 		this.spawnText = "Total";
-		this.vIn = [];
-		this.out = [];
 	}
 	
-	generateString(){
-		this.displayedInfo = [("Total: $" + this.vIn[0])];
-		return this.displayedInfo;
+	generateString(vIn, out){
+		let displayedInfo = [("Total: $" + vIn[0])];
+		return displayedInfo;
 	}
 }
 
@@ -118,13 +106,11 @@ class splitBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 2;
 		this.spawnText = "Splitter";
-		this.vIn = [];
-		this.out = [];
 	}
 	
-	generateString(){
-		this.displayedInfo = [("Value to split: " + vIn[0]), this.out];
-		return this.displayedInfo;
+	generateString(vIn, out){
+		let displayedInfo = [("Value to split: " + vIn[0]), out[0] + " \\_/ " + out[1]];
+		return displayedInfo;
 	}
 }
 
@@ -134,13 +120,11 @@ class addBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Adder";
-		this.vIn = [];
-		this.out = [];
 	}
 	
-	generateString(){
-		this.displayedInfo = [(this.vIn[0] + " + " + this.vIn[1] + " ="), this.out];
-		return this.displayedInfo;
+	generateString(vIn, out){
+		let displayedInfo = [(vIn[0] + " + " + vIn[1] + " ="), out[0]];
+		return displayedInfo;
 	}
 }
 
@@ -150,13 +134,11 @@ class subBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Subtracter";
-		this.vIn = [];
-		this.out = [];
 	}
 
 	generateString(){
-		this.displayedInfo = [(this.vIn[0] + " - " + this.vIn[1] + " ="), this.out];
-		return this.displayedInfo;
+		let displayedInfo = [(vIn[0] + " - " + vIn[1] + " ="), out[0]];
+		return displayedInfo;
 	}
 }
 
@@ -166,13 +148,11 @@ class multBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Multiplier";
-		this.vIn = [];
-		this.out = [];
 	}
 
-	generateString(){
-		this.displayedInfo = [(this.vIn[0] + " x " + this.vIn[1] + " ="), this.out];
-		return this.displayedInfo;
+	generateString(vIn, out){
+		let displayedInfo = [(vIn[0] + " x " + vIn[1] + " ="), out[0]];
+		return displayedInfo;
 	}
 }
 
@@ -182,12 +162,14 @@ class divBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Divider";
-		let val1 = "0",
-		val2 = "1",
-		out = val1/val2;
 		this.displayedInfo = [];
 		this.displayedInfo[0] = (val1 + " / " + val2 + " =");
 		this.displayedInfo[1] = out;
+	}
+
+	generateString(vIn, out){
+		let displayedInfo = [(vIn[0] + " / " + vIn[1] + " ="), out[0]];
+		return displayedInfo;
 	}
 }
 
@@ -252,10 +234,11 @@ class brick {
 		context.fillStyle = "black";
 		context.font = "15px Arial";
 		if(!this.spawner){
-			let lineSpacing = BRICKHEIGHT / this.brickType.displayedInfo.length;
-			for(i = 0; i < this.brickType.displayedInfo.generateString(); i++){
-				let wordSize = context.measureText(this.brickType.displayedInfo[i]);
-				context.fillText(this.brickType.displayedInfo[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
+			let lineSpacing = BRICKHEIGHT / this.brickType.generateString().length;
+			for(i = 0; i < this.brickType.generateString().length; i++){
+				let wordSize = context.measureText(this.brickType.generateString()[i]);
+				console.log(this.brickType.generateString()[i]);
+				context.fillText(this.brickType.generateString()[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
 			}
 		} else {
 			let textSize = context.measureText(this.brickType.spawnText);
