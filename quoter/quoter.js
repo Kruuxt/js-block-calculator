@@ -26,9 +26,11 @@ class baseBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null && vIn[1] != null){
 		let result = [100];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -47,9 +49,11 @@ class maskBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null && vIn[1] != null){
 		let result = [vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -68,9 +72,11 @@ class rackBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null){
 		let result = [vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -90,9 +96,11 @@ class plateBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null){
 		let result = [vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -111,9 +119,11 @@ class qcBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null){
 		let result = [vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -131,9 +141,11 @@ class totalBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null){
 		let result = [vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -151,9 +163,11 @@ class splitBrick {
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null){
 		let result = [vIn[0], vIn[0]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -165,15 +179,23 @@ class addBrick {
 		this.spawnText = "Adder";
 	}
 	
+	//HEY DUMBASS USE THIS ONE TOMORROW PLEASE USE THIS ONE THIS ONE THIS ONE THIS ONE THIS ONE THIS ONE
 	generateString(vIn, out){
-		let displayedInfo = [(vIn[0] + " + " + vIn[1] + " ="), out[0]];
+		let displayInfo = [];
+		if(vIn[0] != null && vIn[1] != null){
+			displayedInfo = [(vIn[0] + " + " + vIn[1] + " ="), out[0]];
+		} else {
+			displayInfo = ["No Input + No Input =", "No Output"];
+		}
 		return displayedInfo;
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null && vIn[1] != null){
 		let result = [vIn[0]+vIn[1]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -186,14 +208,18 @@ class subBrick {
 	}
 
 	generateString(vIn, out){
-		let displayedInfo = [(vIn[0] + " - " + vIn[1] + " ="), out[0]];
-		return displayedInfo;
+		if(vIn[0] != null && vIn[1] != null){
+			let displayedInfo = [(vIn[0] + " - " + vIn[1] + " ="), out[0]];
+			return displayedInfo;
+		}
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null && vIn[1] != null){
 		let result = [vIn[0]-vIn[1]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -206,14 +232,18 @@ class multBrick {
 	}
 
 	generateString(vIn, out){
-		let displayedInfo = [(vIn[0] + " x " + vIn[1] + " ="), out[0]];
-		return displayedInfo;
+		if(vIn[0] != null && vIn[1] != null){
+			let displayedInfo = [(vIn[0] + " x " + vIn[1] + " ="), out[0]];
+			return displayedInfo;
+		}
 	}
 
 	calculate(vIn){
+		if(vIn[0] != null && vIn[1] != null){
 		let result = [vIn[0]*vIn[1]];
 		this.generateString(vIn, result);
 		return result;
+		}else return null;
 	}
 }
 
@@ -226,14 +256,17 @@ class divBrick {
 	}
 
 	generateString(vIn, out){
-		let displayedInfo = [(vIn[0] + " / " + vIn[1] + " ="), out[0]];
-		return displayedInfo;
+		if(vIn[0] != null && vIn[1] != null){
+			let displayedInfo = [(vIn[0] + " / " + vIn[1] + " ="), out[0]];
+			return displayedInfo;
+		}
 	}
 
 	calculate(vIn){
-		let result = [vIn[0]/vIn[1]];
-		this.generateString(vIn, result);
-		return result;
+		if(vIn[0] != null && vIn[1] != null){
+			let result = [vIn[0]/vIn[1]];
+			return result;
+		}else return null;
 	}
 }
 
@@ -258,7 +291,7 @@ class brick {
 			for(let counter = 0; counter < this.brickType.nodeIn; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(true, this,
 					this.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2),
-					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter, 999);
+					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter);
 			}
 		}
 		//Output nodes
@@ -267,7 +300,7 @@ class brick {
 			for(let counter = 0; counter < this.brickType.nodeOut; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(false, this,
 					this.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2),
-					 this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY, counter, 0);
+					 this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY, counter);
 			}
 		}
 	}
@@ -299,13 +332,10 @@ class brick {
 		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
 		context.font = "15px Arial";
-		for (let butt in this.vIn){
-			this.vIn[butt] = this.nodeArray[i].value;
-		}
-		for(let i = this.vIn.length; i < this.nodeArray.length; i++){
-			this.out[i-this.vIn.length] = this.nodeArray[i].value ;
-		}
-		this.out = this.brickType.calculate(this.vIn);
+		for (let butt in this.vIn)
+			this.vIn[butt] = this.nodeArray[butt].value;
+		if(this.brickType.calculate(this.vIn) != null)
+			this.out = this.brickType.calculate(this.vIn);
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
 			for(i = 0; i < this.brickType.generateString(this.vIn, this.out).length; i++){
@@ -377,7 +407,7 @@ class xBox {
 }
 
 class Node {
-	constructor(inNode, iBrick, posX, posY, startX, startY, idl) {
+	constructor(inNode, iBrick, posX, posY, startX, startY, id) {
 		this.inNode = inNode;
 		this.iBrick = iBrick;
 		this.posX = posX;
@@ -386,7 +416,7 @@ class Node {
 		this.startY = startY;
 		this.connectedNode = null;
 		this.id = id;
-		this.value = defVal;
+		this.value = null;
 		this.isConnected = false;
 	}
 
@@ -446,7 +476,7 @@ class Node {
 			this.connectedNode = otherNode;
 			this.connectedNode.isConnected = true;
 			this.connectedNode.connectedNode = this;
-			this.value = otherNode.value;
+			this.value = this.connectedNode.value;
 		}else{
 			otherNode.connect(this);
 		}
