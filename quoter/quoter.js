@@ -5,7 +5,7 @@ const BRICKWIDTH = 200,
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15;
-
+	
 class baseBrick {
 	constructor() {
 		this.color = "gray";
@@ -20,8 +20,15 @@ class baseBrick {
 	}
 	
 	generateString(){
+		
 		let displayedInfo = [("Base Mat.: " + this.baseMaterial), ("S.A.: " + this.surfaceArea)];
 		return displayedInfo;
+	}
+
+	calculate(vIn){
+		let result = [100];
+		this.generateString(vIn, result);
+		return result;
 	}
 }
 
@@ -38,6 +45,12 @@ class maskBrick {
 		let displayedInfo = [("Mask Time Req.: " + this.timeReq + "m")];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class rackBrick {
@@ -52,6 +65,12 @@ class rackBrick {
 	generateString(){
 		let displayedInfo = [("Rack Time Req.: " + this.timeReq + "m")];
 		return displayedInfo;
+	}
+
+	calculate(vIn){
+		let result = [vIn[0]];
+		this.generateString(vIn, result);
+		return result;
 	}
 }
 
@@ -69,6 +88,12 @@ class plateBrick {
 		let displayedInfo = [("Plate Mat.: " + this.plateMat), ("Depth: " + this.depth)];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class qcBrick {
@@ -84,6 +109,12 @@ class qcBrick {
 		let displayedInfo = [("QC Time Req.: " + this.timeReq + "m")];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class totalBrick {
@@ -95,8 +126,14 @@ class totalBrick {
 	}
 	
 	generateString(vIn, out){
-		let displayedInfo = [("Total: $" + vIn[0])];
+		let displayedInfo = [("Total: $" + out[0])];
 		return displayedInfo;
+	}
+
+	calculate(vIn){
+		let result = [vIn[0]];
+		this.generateString(vIn, result);
+		return result;
 	}
 }
 
@@ -112,6 +149,12 @@ class splitBrick {
 		let displayedInfo = [("Value to split: " + vIn[0]), out[0] + " \\_/ " + out[1]];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0], vIn[0]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class addBrick {
@@ -126,6 +169,12 @@ class addBrick {
 		let displayedInfo = [(vIn[0] + " + " + vIn[1] + " ="), out[0]];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0]+vIn[1]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class subBrick {
@@ -136,9 +185,15 @@ class subBrick {
 		this.spawnText = "Subtracter";
 	}
 
-	generateString(){
+	generateString(vIn, out){
 		let displayedInfo = [(vIn[0] + " - " + vIn[1] + " ="), out[0]];
 		return displayedInfo;
+	}
+
+	calculate(vIn){
+		let result = [vIn[0]-vIn[1]];
+		this.generateString(vIn, result);
+		return result;
 	}
 }
 
@@ -154,6 +209,12 @@ class multBrick {
 		let displayedInfo = [(vIn[0] + " x " + vIn[1] + " ="), out[0]];
 		return displayedInfo;
 	}
+
+	calculate(vIn){
+		let result = [vIn[0]*vIn[1]];
+		this.generateString(vIn, result);
+		return result;
+	}
 }
 
 class divBrick {
@@ -162,14 +223,17 @@ class divBrick {
 		this.nodeIn = 2;
 		this.nodeOut = 1;
 		this.spawnText = "Divider";
-		this.displayedInfo = [];
-		this.displayedInfo[0] = (val1 + " / " + val2 + " =");
-		this.displayedInfo[1] = out;
 	}
 
 	generateString(vIn, out){
 		let displayedInfo = [(vIn[0] + " / " + vIn[1] + " ="), out[0]];
 		return displayedInfo;
+	}
+
+	calculate(vIn){
+		let result = [vIn[0]/vIn[1]];
+		this.generateString(vIn, result);
+		return result;
 	}
 }
 
@@ -181,6 +245,8 @@ class brick {
 		this.spawner = spawner,
 		this.nodeArray = [],
 		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
+		this.vIn = [];
+		this.out = [];
 		this.initializeNodes();
 	}
 
@@ -192,7 +258,7 @@ class brick {
 			for(let counter = 0; counter < this.brickType.nodeIn; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(true, this,
 					this.posX + (iNSpacing*(counter+1)) - (NODEWIDTH/2),
-					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter, 10);
+					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter, 999);
 			}
 		}
 		//Output nodes
@@ -201,7 +267,7 @@ class brick {
 			for(let counter = 0; counter < this.brickType.nodeOut; counter++){
 				this.nodeArray[this.nodeArray.length] = new Node(false, this,
 					this.posX + (oNSpacing*(counter+1)) - (NODEWIDTH/2),
-					 this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY, counter, 10);
+					 this.posY + BRICKHEIGHT - (NODEHEIGHT/2), this.posX, this.posY, counter, 0);
 			}
 		}
 	}
@@ -233,12 +299,18 @@ class brick {
 		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
 		context.font = "15px Arial";
+		for (let butt in this.vIn){
+			this.vIn[butt] = this.nodeArray[i].value;
+		}
+		for(let i = this.vIn.length; i < this.nodeArray.length; i++){
+			this.out[i-this.vIn.length] = this.nodeArray[i].value ;
+		}
+		this.out = this.brickType.calculate(this.vIn);
 		if(!this.spawner){
-			let lineSpacing = BRICKHEIGHT / this.brickType.generateString().length;
-			for(i = 0; i < this.brickType.generateString().length; i++){
-				let wordSize = context.measureText(this.brickType.generateString()[i]);
-				console.log(this.brickType.generateString()[i]);
-				context.fillText(this.brickType.generateString()[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
+			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
+			for(i = 0; i < this.brickType.generateString(this.vIn, this.out).length; i++){
+				let wordSize = context.measureText(this.brickType.generateString(this.vIn, this.out)[i]);
+				context.fillText(this.brickType.generateString(this.vIn, this.out)[i], this.posX + BRICKWIDTH/2 - wordSize.width/2, this.posY + lineSpacing*(i)+15);
 			}
 		} else {
 			let textSize = context.measureText(this.brickType.spawnText);
@@ -253,10 +325,10 @@ class brick {
 	}
 
 	drawNodeLines(context){
+		context.lineWidth = 2;
 		for(let i in this.nodeArray){
 			let iNode = this.nodeArray[i];
-			context.lineWidth = 2;
-			if(iNode.connectedNode != null && iNode.connectedNode != undefined){
+			if(iNode.connectedNode != null && iNode.connectedNode != undefined && iNode.inNode){
 				context.beginPath();
 				context.moveTo(iNode.findCenter().x, iNode.findCenter().y);
 				context.lineTo(iNode.connectedNode.findCenter().x, iNode.connectedNode.findCenter().y);
@@ -314,8 +386,9 @@ class Node {
 		this.startY = startY;
 		this.connectedNode = null;
 		this.id = id;
-		this.value;
+		this.value = defVal;
 		this.defVal = defVal;
+		this.isConnected = false;
 	}
 
 	hitBox(){
@@ -352,25 +425,31 @@ class Node {
 
 	disconnect(){
 		if(this.connectedNode != null){
-			if(this.connectedNode.connectedNode != null)
-				this.connectedNode.connectedNode = null;
-			this.connectedNode = null;
-			this.value = null;
-			this.iBrick.brickType.vIn[this.id] = this.defVal;
-			this.connectedNode.iBrick.brickType.vIn[this.connectedNode.id] = this.connectedNode.defVal; 
-			this.connectedNode.connectedNode.iBrick.brickType.vIn[this.connectedNode.connectedNode.id] = this.connectedNode.connectedNode.defVal; 
+			this.connectedNode.isConnected = false;
+			this.connectedNode.connectedNode = null;
 		}
+		this.connectedNode = null;
 	}
 
+
 	connect(otherNode){
-		otherNode.disconnect();
-		console.log("connecting nodes.");
-		this.connectedNode = otherNode;
-		otherNode.connectedNode = this;
 		if(this.inNode){
-			this.value = this.connectedNode.value;
+			this.disconnect();
+			if(otherNode.isConnected){
+				for(let i in brickArray){
+					for(let j in brickArray[i].nodeArray){
+						if (brickArray[i].nodeArray[j] === otherNode && brickArray[i].nodeArray[j] != this){
+							brickArray[i].nodeArray[j].disconnect(true);
+						}
+					}
+				}
+			}
+			this.connectedNode = otherNode;
+			this.connectedNode.isConnected = true;
+			this.connectedNode.connectedNode = this;
+			this.value = otherNode.value;
 		}else{
-			this.connectedNode.value = this.value;
+			otherNode.connect(this);
 		}
 	}
 
@@ -397,6 +476,19 @@ class Node {
 		context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
 	}
 }
+	
+let brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true),
+	new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true),
+	new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true),
+	new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true),
+	new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true),
+	new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true),
+	new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true),
+	new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true),
+	new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true),
+	new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true),
+	new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true)];
+
 
 window.onload = function() {
 	//Define canvas elements
@@ -407,17 +499,6 @@ window.onload = function() {
 		rect = canvas.getBoundingClientRect(),
 		width = canvas.width = 1235,
 		height = canvas.height = window.innerHeight*(4/5),
-		brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true),
-			new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true),
-			new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true),
-			new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true),
-			new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true),
-			new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true),
-			new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true),
-			new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true),
-			new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true),
-			new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true),
-			new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true)],
 		selectedBrick = null,
 		selectedNode = null,
 		clearScreenButton = document.getElementById("sCButton");
@@ -472,7 +553,6 @@ window.onload = function() {
 				if(iNode.checkClick(mouseX, mouseY)){
 						selectedNode = iNode;
 						selectedNode.disconnect();
-						console.log("Selected node: " + selectedNode);
 				}
 			}
 		}
