@@ -377,7 +377,7 @@ class xBox {
 }
 
 class Node {
-	constructor(inNode, iBrick, posX, posY, startX, startY, id, defVal) {
+	constructor(inNode, iBrick, posX, posY, startX, startY, idl) {
 		this.inNode = inNode;
 		this.iBrick = iBrick;
 		this.posX = posX;
@@ -387,7 +387,6 @@ class Node {
 		this.connectedNode = null;
 		this.id = id;
 		this.value = defVal;
-		this.defVal = defVal;
 		this.isConnected = false;
 	}
 
