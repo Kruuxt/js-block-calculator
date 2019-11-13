@@ -2,6 +2,7 @@
 const BRICKWIDTH = 200,
 	BRICKHEIGHT = 50,
 	SELECTERGAP = 5,
+	SELECTHEIGHT = (BRICKHEIGHT * 2) + (SELECTERGAP * 3),
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15;
@@ -460,6 +461,24 @@ class brick {
 		}
 	}
 
+	moveBrick(x, y, rect){
+		if(x < rect.left){
+			this.posX = rect.left;
+		}else if(x + BRICKWIDTH > rect.right){
+			this.posX = rect.right - BRICKWIDTH;
+		}else{
+			this.posX = x;
+		}
+		
+		if(y < rect.top + SELECTHEIGHT + (NODEHEIGHT/2)){
+			this.posY = rect.top + SELECTHEIGHT + (NODEHEIGHT/2);
+		}else if(y + (2 * BRICKHEIGHT) - 13 > rect.bottom){
+			this.posY = rect.bottom - (2 * BRICKHEIGHT) + 13;
+		}else{
+			this.posY = y;
+		}
+	}
+
 	draw(context){
 		context.lineWidth = 2;
 		context.fillStyle = this.brickType.color;
@@ -468,17 +487,7 @@ class brick {
 		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
 		context.font = "15px Arial";
-
-		for(let j in this.nodeArray){
-			this.nodeArray[j].updateValue();
-		}
-
-		for (let butt = 0; butt < this.brickType.nodeIn; butt++){
-			this.vIn[butt] = this.nodeArray[butt].value;
-		}
-
-		this.out = this.brickType.calculate(this.vIn);
-		
+		this.updateNodeValues();
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
 			for(i = 0; i < this.brickType.generateString(this.vIn, this.out).length; i++){
@@ -489,6 +498,18 @@ class brick {
 			let textSize = context.measureText(this.brickType.spawnText);
 			context.fillText(this.brickType.spawnText, this.posX + BRICKWIDTH/2 - textSize.width/2, this.posY + BRICKHEIGHT/2);
 		}
+	}
+
+	updateNodeValues(){
+		for(let j in this.nodeArray){
+			this.nodeArray[j].updateValue();
+		}
+
+		for (let butt = 0; butt < this.brickType.nodeIn; butt++){
+			this.vIn[butt] = this.nodeArray[butt].value;
+		}
+
+		this.out = this.brickType.calculate(this.vIn);
 	}
 
 	suicide(){
@@ -509,7 +530,6 @@ class brick {
 			}
 		}
 	}
-
 }
 
 class xBox {
@@ -541,7 +561,7 @@ class xBox {
 }
 
 	checkClick(x, y){
-		if(this.posX < x && this.posX + XSIZE > x && this.posY < y && this.posY + XSIZE > y){
+		if(this.posX < x && this.posX + XSIZE > x && this.posY < y && this.posY + XSIZE > y && !this.iBrick.spawner){
 			return true;
 		}else{
 			return false;
@@ -693,6 +713,7 @@ window.onload = function() {
 
 	function draw() {
 		context.clearRect(0, 0, width, height);
+	
 		for(i in brickArray){
 			if(brickArray[i] != null) brickArray[i].drawNodeLines(context);
 		}
@@ -705,6 +726,11 @@ window.onload = function() {
 				iBrick.xBox.draw(context);
 			}
 		}
+		context.lineWidth = 2;
+		context.beginPath();
+		context.moveTo(rect.left, rect.top + SELECTHEIGHT);
+		context.lineTo(width, rect.top + SELECTHEIGHT);
+		context.stroke();
 	}
 
 	function line(x1, y1, x2, y2){
@@ -724,7 +750,7 @@ window.onload = function() {
 				yOff = mouseY - selectedBrick.posY;
 				if(iBrick.spawner){
 					selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
-						 mouseY-yOff, iBrick.brickType, false);
+						rect.top + SELECTHEIGHT + (NODEHEIGHT/2), iBrick.brickType, false);
 				}
 				if(iBrick.xBox.checkClick(mouseX, mouseY)){
 					iBrick.suicide();
@@ -761,12 +787,9 @@ window.onload = function() {
 	function onMouseMove(event) {
 		updateMouse();
 		if(selectedBrick != null){
-			if((mouseY + BRICKHEIGHT) < rect.bottom){
-				selectedBrick.posX = mouseX - xOff;
-				selectedBrick.posY = mouseY - yOff;
-				selectedBrick.updateBrick();
-				draw();
-			}
+			selectedBrick.moveBrick(mouseX - xOff, mouseY - yOff, rect);
+			selectedBrick.updateBrick();
+			draw();
 		}
 		if(selectedNode != null){
 			draw();
@@ -811,6 +834,7 @@ window.onload = function() {
 
 	function rng(){
 		randomNumber = Math.round(Math.random()*100);
+		draw();
 		draw();
 	}
 };
