@@ -5,7 +5,8 @@ const BRICKWIDTH = 200,
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15;
-	
+let randomNumber = 100;
+
 class baseBrick {
 	constructor() {
 		this.color = "gray";
@@ -18,19 +19,21 @@ class baseBrick {
 		this.displayedInfo[0] = ("Base Mat.: " + baseMaterial);
 		this.displayedInfo[1] = ("S.A.: " + surfaceArea);
 	}
-	
-	generateString(){
-		
-		let displayedInfo = [("Base Mat.: " + this.baseMaterial), ("S.A.: " + this.surfaceArea)];
-		return displayedInfo;
+
+	generateString(vIn, out){
+		let nullIn = false;
+		let displayInfo = []
+		displayInfo[0] = ("Temporarily outputting: ");
+		if(nullIn){
+			displayInfo[1] = "Input Empty";
+		}else{
+			displayInfo[1] = out;
+		}
+		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-		let result = [100];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+		return randomNumber;
 	}
 }
 
@@ -48,12 +51,34 @@ class maskBrick {
 		return displayedInfo;
 	}
 
+	generateString(vIn, out){
+		let nullIn = false;
+		let topRow = [""]
+		let displayInfo = []
+		for(let i in vIn)
+			if(vIn[i] != null)
+				topRow[i].concat(vIn[i]);
+				else{
+					topRow[i].concat("No Input");
+					nullIn = true;
+				}
+		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+			else
+			displayInfo[1] = out[0];
+			
+		return displayInfo;
+	}
+
 	calculate(vIn){
 		if(vIn[0] != null && vIn[1] != null){
-		let result = [vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+			let result = [vIn[0]*vIn[1]];
+			this.generateString(vIn, result);
+			return result;
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -65,18 +90,35 @@ class rackBrick {
 		this.spawnText = "Rack/Unrack";
 		let timeReq = 10;
 	}
-	
-	generateString(){
-		let displayedInfo = [("Rack Time Req.: " + this.timeReq + "m")];
-		return displayedInfo;
+
+	generateString(vIn, out){
+		let nullIn = false;
+		let topRow = [""]
+		let displayInfo = []
+		for(let i in vIn)
+			if(vIn[i] != null)
+				topRow[i].concat(vIn[i]);
+				else{
+					topRow[i].concat("No Input");
+					nullIn = true;
+				}
+		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+			else
+			displayInfo[1] = out[0];
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null){
-		let result = [vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+		if(vIn[0] != null && vIn[1] != null){
+			let result = [vIn[0]*vIn[1]];
+			this.generateString(vIn, result);
+			return result;
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -89,18 +131,35 @@ class plateBrick {
 		this.plateMat = "copper";
 		this.depth = 0.00005;
 	}
-	
-	generateString(){
-		let displayedInfo = [("Plate Mat.: " + this.plateMat), ("Depth: " + this.depth)];
-		return displayedInfo;
+
+	generateString(vIn, out){
+		let nullIn = false;
+		let topRow = [""]
+		let displayInfo = []
+		for(let i in vIn)
+			if(vIn[i] != null)
+				topRow[i].concat(vIn[i]);
+				else{
+					topRow[i].concat("No Input");
+					nullIn = true;
+				}
+		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+			else
+			displayInfo[1] = out[0];
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null){
-		let result = [vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+		if(vIn[0] != null && vIn[1] != null){
+			let result = [vIn[0]*vIn[1]];
+			this.generateString(vIn, result);
+			return result;
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -112,18 +171,34 @@ class qcBrick {
 		this.spawnText = "Quality Control";
 		let timeReq = 10;
 	}
-	
-	generateString(){
-		let displayedInfo = [("QC Time Req.: " + this.timeReq + "m")];
-		return displayedInfo;
+
+	generateString(vIn, out){
+		let nullIn = false;
+		let topRow = [""]
+		let displayInfo = []
+		for(let i in vIn)
+			if(vIn[i] != null)
+				topRow[i].concat(vIn[i]);
+				else{
+					topRow[i].concat("No Input");
+					nullIn = true;
+				}
+		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+			else
+			displayInfo[1] = out[0];
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null){
-		let result = [vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+		if(vIn[0] != null && vIn[1] != null){
+			let result = [vIn[0]*vIn[1]];
+			return result;
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -134,18 +209,20 @@ class totalBrick {
 		this.nodeOut = 0;
 		this.spawnText = "Total";
 	}
-	
+
 	generateString(vIn, out){
-		let displayedInfo = [("Total: $" + out[0])];
-		return displayedInfo;
+		let displayInfo = ["Total:"];
+
+		if(vIn[0] != null)
+			displayInfo[1] = vIn[0];
+		else
+			displayInfo[1] = "No Input";
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null){
-		let result = [vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+		return null;
 	}
 }
 
@@ -156,18 +233,24 @@ class splitBrick {
 		this.nodeOut = 2;
 		this.spawnText = "Splitter";
 	}
-	
+
 	generateString(vIn, out){
-		let displayedInfo = [("Value to split: " + vIn[0]), out[0] + " \\_/ " + out[1]];
-		return displayedInfo;
+		let displayInfo = [];
+		if(vIn[0] === null){
+			displayInfo[0] = "Input Empty";
+		} else {
+			displayInfo[0] = vIn[0];
+			displayInfo[1] = [out + " | " + out];
+		}
+		return displayInfo;
 	}
 
 	calculate(vIn){
 		if(vIn[0] != null){
-		let result = [vIn[0], vIn[0]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+			return vIn[0];
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -178,24 +261,34 @@ class addBrick {
 		this.nodeOut = 1;
 		this.spawnText = "Adder";
 	}
-	
-	//HEY DUMBASS USE THIS ONE TOMORROW PLEASE USE THIS ONE THIS ONE THIS ONE THIS ONE THIS ONE THIS ONE
+
 	generateString(vIn, out){
-		let displayInfo = [];
-		if(vIn[0] != null && vIn[1] != null){
-			displayedInfo = [(vIn[0] + " + " + vIn[1] + " ="), out[0]];
-		} else {
-			displayInfo = ["No Input + No Input =", "No Output"];
+		let nullIn = false;
+		let topRow = ["", ""]
+		let displayInfo = []
+		for(let i in vIn){
+			if(vIn[i] != null){
+				topRow[i] = topRow[i].concat(vIn[i]);
+			}else{
+				topRow[i] = topRow[i].concat("No Input");
+				nullIn = true;
+			}
 		}
-		return displayedInfo;
+		displayInfo[0] = (topRow[0] + " + " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+		else
+			displayInfo[1] = out;
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
 		if(vIn[0] != null && vIn[1] != null){
-		let result = [vIn[0]+vIn[1]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+			return vIn[0]+vIn[1];
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -208,18 +301,32 @@ class subBrick {
 	}
 
 	generateString(vIn, out){
-		if(vIn[0] != null && vIn[1] != null){
-			let displayedInfo = [(vIn[0] + " - " + vIn[1] + " ="), out[0]];
-			return displayedInfo;
+		let nullIn = false;
+		let topRow = ["", ""]
+		let displayInfo = []
+		for(let i in vIn){
+			if(vIn[i] != null){
+				topRow[i] = topRow[i].concat(vIn[i]);
+			}else{
+				topRow[i] = topRow[i].concat("No Input");
+				nullIn = true;
+			}
 		}
+		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+		else
+			displayInfo[1] = out;
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
 		if(vIn[0] != null && vIn[1] != null){
-		let result = [vIn[0]-vIn[1]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+			return vIn[0]-vIn[1];
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -232,18 +339,32 @@ class multBrick {
 	}
 
 	generateString(vIn, out){
-		if(vIn[0] != null && vIn[1] != null){
-			let displayedInfo = [(vIn[0] + " x " + vIn[1] + " ="), out[0]];
-			return displayedInfo;
+		let nullIn = false;
+		let topRow = ["", ""]
+		let displayInfo = []
+		for(let i in vIn){
+			if(vIn[i] != null){
+				topRow[i] = topRow[i].concat(vIn[i]);
+			}else{
+				topRow[i] = topRow[i].concat("No Input");
+				nullIn = true;
+			}
 		}
+		displayInfo[0] = (topRow[0] + " * " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+		else
+			displayInfo[1] = out;
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
 		if(vIn[0] != null && vIn[1] != null){
-		let result = [vIn[0]*vIn[1]];
-		this.generateString(vIn, result);
-		return result;
-		}else return null;
+			return vIn[0]*vIn[1];
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -256,17 +377,32 @@ class divBrick {
 	}
 
 	generateString(vIn, out){
-		if(vIn[0] != null && vIn[1] != null){
-			let displayedInfo = [(vIn[0] + " / " + vIn[1] + " ="), out[0]];
-			return displayedInfo;
+		let nullIn = false;
+		let topRow = ["", ""]
+		let displayInfo = []
+		for(let i in vIn){
+			if(vIn[i] != null){
+				topRow[i] = topRow[i].concat(vIn[i]);
+			}else{
+				topRow[i] = topRow[i].concat("No Input");
+				nullIn = true;
+			}
 		}
+		displayInfo[0] = (topRow[0] + " / " + topRow[1] + " =");
+		if(nullIn)
+			displayInfo[1] = "Input Empty";
+		else
+			displayInfo[1] = out;
+			
+		return displayInfo;
 	}
 
 	calculate(vIn){
 		if(vIn[0] != null && vIn[1] != null){
-			let result = [vIn[0]/vIn[1]];
-			return result;
-		}else return null;
+			return vIn[0]/vIn[1];
+		}else{
+			return null;
+		}
 	}
 }
 
@@ -332,10 +468,17 @@ class brick {
 		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
 		context.font = "15px Arial";
-		for (let butt in this.vIn)
+
+		for(let j in this.nodeArray){
+			this.nodeArray[j].updateValue();
+		}
+
+		for (let butt = 0; butt < this.brickType.nodeIn; butt++){
 			this.vIn[butt] = this.nodeArray[butt].value;
-		if(this.brickType.calculate(this.vIn) != null)
-			this.out = this.brickType.calculate(this.vIn);
+		}
+
+		this.out = this.brickType.calculate(this.vIn);
+		
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
 			for(i = 0; i < this.brickType.generateString(this.vIn, this.out).length; i++){
@@ -453,11 +596,20 @@ class Node {
 	}
 
 	disconnect(){
+		if(this.inNode)
+			this.value = null;
 		if(this.connectedNode != null){
+			if(!this.inNode)
+				this.connectedNode.value = null;
 			this.connectedNode.isConnected = false;
 			this.connectedNode.connectedNode = null;
+			this.connectedNode = null;
 		}
-		this.connectedNode = null;
+	}
+
+	updateValue(){
+		if(this.inNode && this.isConnected)
+			this.value = this.connectedNode.iBrick.out;
 	}
 
 
@@ -473,10 +625,11 @@ class Node {
 					}
 				}
 			}
+			this.isConnected = true;
 			this.connectedNode = otherNode;
 			this.connectedNode.isConnected = true;
 			this.connectedNode.connectedNode = this;
-			this.value = this.connectedNode.value;
+			this.value = this.connectedNode.iBrick.out;
 		}else{
 			otherNode.connect(this);
 		}
@@ -490,7 +643,9 @@ class Node {
 	}
 
 	checkClick(x, y){
-		if(this.hitBox().x1 < x && this.hitBox().x2 > x && this.hitBox().y1 < y && this.hitBox().y2 > y){
+		if(this.hitBox().x1 < x && this.hitBox().x2 > x
+		&& this.hitBox().y1 < y && this.hitBox().y2 > y
+		&& !this.iBrick.spawner){
 			return true;
 		}else{
 			return false;
@@ -532,6 +687,8 @@ window.onload = function() {
 		selectedNode = null,
 		clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
+		rngButton = document.getElementById("RNG");
+		rngButton.onclick = rng;
 	draw();
 
 	function draw() {
@@ -649,6 +806,11 @@ window.onload = function() {
 		for (iterator = 11; iterator < brickArray.length; iterator++){
 			brickArray[iterator] = null;
 		}
+		draw();
+	}
+
+	function rng(){
+		randomNumber = Math.round(Math.random()*100);
 		draw();
 	}
 };
