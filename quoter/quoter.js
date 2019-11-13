@@ -2,7 +2,7 @@
 const BRICKWIDTH = 200,
 	BRICKHEIGHT = 50,
 	SELECTERGAP = 5,
-	SELECTHEIGHT = (BRICKHEIGHT * 2) + (SELECTERGAP * 3),
+	SELECTHEIGHT = (BRICKHEIGHT * 2) + (SELECTERGAP * 2),
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15;
@@ -505,8 +505,8 @@ class brick {
 			this.nodeArray[j].updateValue();
 		}
 
-		for (let butt = 0; butt < this.brickType.nodeIn; butt++){
-			this.vIn[butt] = this.nodeArray[butt].value;
+		for (let i = 0; i < this.brickType.nodeIn; i++){
+			this.vIn[i] = this.nodeArray[i].value;
 		}
 
 		this.out = this.brickType.calculate(this.vIn);
@@ -618,13 +618,15 @@ class Node {
 	disconnect(){
 		if(this.inNode)
 			this.value = null;
-		if(this.connectedNode != null){
-			if(!this.inNode)
-				this.connectedNode.value = null;
-			this.connectedNode.isConnected = false;
-			this.connectedNode.connectedNode = null;
-			this.connectedNode = null;
-		}
+			if(this.connectedNode != null){
+				if(!this.inNode)
+					this.connectedNode.value = null;
+				this.isConnected = false;
+				this.connectedNode.isConnected = false;
+				this.connectedNode.connectedNode = null;
+				this.connectedNode = null;
+			}
+		
 	}
 
 	updateValue(){
@@ -815,13 +817,13 @@ window.onload = function() {
 							break;
 					}
 				}
-
 			}
 		}
 		if(selectedNode != null) selectedNode.disconnect();
 		selectedNode = null;
 		document.body.removeEventListener("mousemove", onMouseMove);
 		document.body.removeEventListener("mouseup", onMouseUp);
+		draw();
 		draw();
 	}
 
