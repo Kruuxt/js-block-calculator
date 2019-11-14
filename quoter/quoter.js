@@ -6,20 +6,30 @@ const BRICKWIDTH = 200,
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15,
+	RACKMINUTE=60,
+	QCMINUTE=60,
+	MASKMINUTE=60,
 	COPPER = "Copper",
 	STEEL = "Steel",
 	SS = "Stainless",
 	ALUMINUM = "Aluminum",
-	BASEMATERIALS = [COPPER, STEEL, SS, ALUMINUM];
+	NICKEL= "Nickel",
+	GOLD = "Gold",
+	SILVER = "Silver",
+	NIBRON = "Nibron",
+	TINLEAD = "Tin Lead",
+	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL],
+	PLATEMATERIALS = [COPPER, NICKEL, GOLD, SILVER, NIBRON, TINLEAD];
 let randomNumber = 100;
 
 class baseBrick {
 	constructor() {
-		this.color = "gray";
-		this.nodeIn = 0;
-		this.nodeOut = 1;
-		this.spawnText = "Base Material";
+		this.color = "gray",
+		this.nodeIn = 0,
+		this.nodeOut = 1,
+		this.spawnText = "Base Material",
 		this.baseMaterial = null,
+		this.lastMetal = null,
 		this.surfaceArea = null;
 	}
 
@@ -49,6 +59,7 @@ class baseBrick {
 
 	setFields(){
 		this.baseMaterial = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
+		this.lastMetal = this.baseMaterial;
 		if(document.getElementById("surfaceArea").value != "")
 			this.surfaceArea = document.getElementById("surfaceArea").value;
 		else
@@ -73,17 +84,19 @@ class baseBrick {
 	}
 
 	calculate(vIn){
-		return randomNumber;
+		return 0;
 	}
 }
 
 class maskBrick {
 	constructor() {
-		this.color = "green";
-		this.nodeIn = 1;
-		this.nodeOut = 1;
-		this.spawnText = "Mask/Unmask";
-		this.timeReq = null;
+		this.color = "green",
+		this.nodeIn = 1,
+		this.nodeOut = 1,
+		this.spawnText = "Mask/Unmask",
+		this.timeReq = null,
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	displayFields(div){
@@ -119,7 +132,7 @@ class maskBrick {
 	}
 
 	calculate(vIn){
-		return randomNumber;
+		return vIn[0] + (this.timeReq * MASKMINUTE);
 	}
 }
 
@@ -128,8 +141,8 @@ class rackBrick {
 		this.color = "green";
 		this.nodeIn = 1;
 		this.nodeOut = 1;
-		this.spawnText = "Rack/Unrack";
-		let timeReq = null;
+		this.spawnText = "Rack/Unrack",
+		this.timeReq = null;
 	}
 
 	displayFields(div){
@@ -165,64 +178,112 @@ class rackBrick {
 	}
 
 	calculate(vIn){
-		return randomNumber;
+		return vIn[0] + (this.timeReq * RACKMINUTE);;
 	}
 }
 
 class plateBrick {
 	constructor() {
-		this.color = "blue";
-		this.nodeIn = 1;
-		this.nodeOut = 1;
-		this.spawnText = "Plating Layer";
-		this.plateMat = "copper";
-		this.depth = 0.00005;
+		this.color = "blue",
+		this.nodeIn = 1,
+		this.nodeOut = 1,
+		this.spawnText = "Plating Layer",
+		this.plateMat = null,
+		this.depth = null,
+		this.lastMetal = null,
+		this.surfaceArea = null;
+	}
+		displayFields(div){
+		let plateSelector = document.createElement("select"),
+			optionList = this.getOptions(),
+			plateDepth = document.createElement("input");
+		for(let i in optionList)
+			plateSelector.add(optionList[i]);
+		plateDepth.value = this.depth;
+		plateDepth.placeholder = "Plating Thickness";
+		plateSelector.id = "plateSelector";
+		plateDepth.id = "plateDepth";
+		div.appendChild(plateSelector);
+		div.appendChild(plateDepth);
 	}
 
-	displayFields(div){
-		let timeReqIn = document.createElement("input");
-		timeReqIn.value = this.timeReq;
-		timeReqIn.placeholder = "Masking Time Required";
-		timeReqIn.id = "timeReq";
-		div.appendChild(timeReqIn);
+	getOptions(){
+		let optionList = [];
+		for(let i in PLATEMATERIALS){
+			optionList[i] = document.createElement("option");
+			optionList[i].value = PLATEMATERIALS[i];
+			optionList[i].text = PLATEMATERIALS[i];
+		}
+		return optionList;
 	}
 
 	setFields(){
-		if(document.getElementById("timeReq").value != "")
-			this.timeReq = document.getElementById("timeReq").value;
+		this.plateMat = PLATEMATERIALS[document.getElementById("plateSelector").selectedIndex];
+		this.lastMetal = this.plateMat;
+		if(document.getElementById("plateDepth").value != "")
+			this.depth = document.getElementById("plateDepth").value;
 		else
-			this.timeReq = null;
+			this.depth = null;
 	}
 
 	generateString(vIn, out){
 		let displayInfo = [];
-			displayInfo[0] = ("Mask Time: ");
-			displayInfo[1] = ("Cost: ");
-		if(this.timeReq != null){
-			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+			displayInfo[0] = ("Plate Mat.: ");
+			displayInfo[1] = ("Depth: ");
+		if(this.plateMat != null){
+			displayInfo[0] = displayInfo[0].concat(this.plateMat);
 		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined.");
+			displayInfo[0] = displayInfo[0].concat("Undefined");
 		}
-		if(this.timeReq != null){
-			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		if(this.depth != null){
+			displayInfo[1] = displayInfo[1].concat(this.depth);
 		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined.");
+			displayInfo[1] = displayInfo[1].concat("Undefined");
 		}
 		return displayInfo;
 	}
 
-	calculate(vIn){
-		return randomNumber;
+	getMatCost(material){
+		switch(material){
+			case "Copper":
+				return 0;
+				break;
+			case "Nickel":
+				return 0;
+				break;
+			case "Gold":
+				return 1.76;
+				break;
+			case "Silver":
+				return .125;
+				break;
+			case "Nibron":
+				return 0;
+				break;
+			case "Tin Lead":
+				return 0;
+				break;
+			default:
+				return 0;
+				break;
+		}
 	}
+
+	calculate(vIn){
+		return vIn[0] + (this.depth * 10000 * this.getMatCost * this.surfaceArea);
+	}
+
 }
 
 class qcBrick {
 	constructor() {
-		this.color = "green";
-		this.nodeIn = 1;
-		this.nodeOut = 1;
-		this.spawnText = "Quality Control";
-		let timeReq = 10;
+		this.color = "green",
+		this.nodeIn = 1,
+		this.nodeOut = 1,
+		this.spawnText = "Quality Control",
+		this.timeReq = null,
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	displayFields(div){
@@ -264,20 +325,35 @@ class qcBrick {
 
 class totalBrick {
 	constructor() {
-		this.color = "orange";
-		this.nodeIn = 1;
-		this.nodeOut = 0;
-		this.spawnText = "Total";
+		this.color = "orange",
+		this.nodeIn = 1,
+		this.nodeOut = 0,
+		this.spawnText = "Total",
+		this.lastMetal = null,
+		this.surfaceArea = null;
+	}
+
+	displayFields(div){
+	}
+
+	setFields(){
 	}
 
 	generateString(vIn, out){
-		let displayInfo = ["Total:"];
+		let displayInfo = ["Total:", ""];
 
-		if(vIn[0] != null)
-			displayInfo[1] = vIn[0];
-		else
+		if(vIn[0] != null){
+			displayInfo[1] = "" + vIn[0];
+		}else{
 			displayInfo[1] = "No Input";
-			
+		}
+		if(this.lastMetal != null){
+			displayInfo[1] = displayInfo[1].concat(" " + this.lastMetal);
+		}else{
+			console.log(displayInfo[1])
+			displayInfo[1] = displayInfo[1].concat(" No Metal");
+		}
+		
 		return displayInfo;
 	}
 
@@ -288,10 +364,12 @@ class totalBrick {
 
 class splitBrick {
 	constructor() {
-		this.color = "orange";
-		this.nodeIn = 1;
-		this.nodeOut = 2;
-		this.spawnText = "Splitter";
+		this.color = "orange",
+		this.nodeIn = 1,
+		this.nodeOut = 2,
+		this.spawnText = "Splitter",
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
@@ -316,10 +394,12 @@ class splitBrick {
 
 class addBrick {
 	constructor() {
-		this.color = "yellow";
-		this.nodeIn = 2;
-		this.nodeOut = 1;
-		this.spawnText = "Adder";
+		this.color = "yellow",
+		this.nodeIn = 2,
+		this.nodeOut = 1,
+		this.spawnText = "Adder",
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
@@ -354,10 +434,12 @@ class addBrick {
 
 class subBrick {
 	constructor() {
-		this.color = "yellow";
-		this.nodeIn = 2;
-		this.nodeOut = 1;
-		this.spawnText = "Subtracter";
+		this.color = "yellow",
+		this.nodeIn = 2,
+		this.nodeOut = 1,
+		this.spawnText = "Subtracter",
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
@@ -392,10 +474,12 @@ class subBrick {
 
 class multBrick {
 	constructor() {
-		this.color = "yellow";
-		this.nodeIn = 2;
-		this.nodeOut = 1;
-		this.spawnText = "Multiplier";
+		this.color = "yellow",
+		this.nodeIn = 2,
+		this.nodeOut = 1,
+		this.spawnText = "Multiplier",
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
@@ -430,10 +514,12 @@ class multBrick {
 
 class divBrick {
 	constructor() {
-		this.color = "yellow";
-		this.nodeIn = 2;
-		this.nodeOut = 1;
-		this.spawnText = "Divider";
+		this.color = "yellow",
+		this.nodeIn = 2,
+		this.nodeOut = 1,
+		this.spawnText = "Divider",
+		this.lastMetal = null,
+		this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
@@ -473,9 +559,9 @@ class brick {
 		this.brickType = brickType,
 		this.spawner = spawner,
 		this.nodeArray = [],
-		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
-		this.vIn = [];
-		this.out = [];
+		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY),
+		this.vIn = [],
+		this.out = [],
 		this.id = id;
 		this.initializeNodes();
 	}
@@ -547,6 +633,7 @@ class brick {
 		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
 		context.fillStyle = "black";
 		context.font = "15px Arial";
+		this.updateNodeValues();
 		this.updateNodeValues();
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
@@ -690,8 +777,13 @@ class Node {
 	}
 
 	updateValue(){
-		if(this.inNode && this.isConnected)
+		if(this.inNode && this.isConnected){
 			this.value = this.connectedNode.iBrick.out;
+			if(this.connectedNode.iBrick.brickType.lastMetal != null && this.iBrick.brickType.color != "blue")
+				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
+			if(this.connectedNode.iBrick.brickType.surfaceArea != null)
+				this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
+		}
 	}
 
 
@@ -712,6 +804,10 @@ class Node {
 			this.connectedNode.isConnected = true;
 			this.connectedNode.connectedNode = this;
 			this.value = this.connectedNode.iBrick.out;
+			if(this.connectedNode.iBrick.brickType.lastMetal != null)
+				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
+			if(this.connectedNode.iBrick.brickType.surfaceArea != null)
+				this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
 		}else{
 			otherNode.connect(this);
 		}
