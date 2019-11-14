@@ -1,11 +1,16 @@
 //Define constants
 const BRICKWIDTH = 200,
 	BRICKHEIGHT = 50,
-	SELECTERGAP = 5,
-	SELECTHEIGHT = (BRICKHEIGHT * 2) + (SELECTERGAP * 2),
+	SELECTORGAP = 5,
+	SELECTHEIGHT = (BRICKHEIGHT * 2) + (SELECTORGAP * 2),
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
-	XSIZE=15;
+	XSIZE=15,
+	COPPER = "Copper",
+	STEEL = "Steel",
+	SS = "Stainless",
+	ALUMINUM = "Aluminum",
+	BASEMATERIALS = [COPPER, STEEL, SS, ALUMINUM];
 let randomNumber = 100;
 
 class baseBrick {
@@ -14,21 +19,55 @@ class baseBrick {
 		this.nodeIn = 0;
 		this.nodeOut = 1;
 		this.spawnText = "Base Material";
-		let baseMaterial = "copper",
-		surfaceArea = 123;
-		this.displayedInfo = [];
-		this.displayedInfo[0] = ("Base Mat.: " + baseMaterial);
-		this.displayedInfo[1] = ("S.A.: " + surfaceArea);
+		this.baseMaterial = null,
+		this.surfaceArea = null;
+	}
+
+	displayFields(div){
+		let bmSelector = document.createElement("select"),
+			optionList = this.getOptions(),
+			surfaceArea = document.createElement("input");
+		for(let i in optionList)
+			bmSelector.add(optionList[i]);
+		surfaceArea.value = this.surfaceArea;
+		surfaceArea.placeholder = "Surface Area";
+		bmSelector.id = "bmSelector";
+		surfaceArea.id = "surfaceArea";
+		div.appendChild(bmSelector);
+		div.appendChild(surfaceArea);
+	}
+
+	getOptions(){
+		let optionList = [];
+		for(let i in BASEMATERIALS){
+			optionList[i] = document.createElement("option");
+			optionList[i].value = BASEMATERIALS[i];
+			optionList[i].text = BASEMATERIALS[i];
+		}
+		return optionList;
+	}
+
+	setFields(){
+		this.baseMaterial = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
+		if(document.getElementById("surfaceArea").value != "")
+			this.surfaceArea = document.getElementById("surfaceArea").value;
+		else
+			this.surfaceArea = null;
 	}
 
 	generateString(vIn, out){
-		let nullIn = false;
-		let displayInfo = []
-		displayInfo[0] = ("Temporarily outputting: ");
-		if(nullIn){
-			displayInfo[1] = "Input Empty";
+		let displayInfo = [];
+			displayInfo[0] = ("Base Material: ");
+			displayInfo[1] = ("Surface Area: ");
+		if(this.baseMaterial != null){
+			displayInfo[0] = displayInfo[0].concat(this.baseMaterial + ".");
 		}else{
-			displayInfo[1] = out;
+			displayInfo[0] = displayInfo[0].concat("Undefined.");
+		}
+		if(this.surfaceArea != null){
+			displayInfo[1] = displayInfo[1].concat(this.surfaceArea + ".");
+		}else{
+			displayInfo[1] = displayInfo[1].concat("Undefined.");
 		}
 		return displayInfo;
 	}
@@ -44,42 +83,43 @@ class maskBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Mask/Unmask";
-		let timeReq = 10;
+		this.timeReq = null;
 	}
-	
-	generateString(){
-		let displayedInfo = [("Mask Time Req.: " + this.timeReq + "m")];
-		return displayedInfo;
+
+	displayFields(div){
+		let timeReqIn = document.createElement("input");
+		timeReqIn.value = this.timeReq;
+		timeReqIn.placeholder = "Masking Time Required";
+		timeReqIn.id = "timeReq";
+		div.appendChild(timeReqIn);
+	}
+
+	setFields(){
+		if(document.getElementById("timeReq").value != "")
+			this.timeReq = document.getElementById("timeReq").value;
+		else
+			this.timeReq = null;
 	}
 
 	generateString(vIn, out){
-		let nullIn = false;
-		let topRow = [""]
-		let displayInfo = []
-		for(let i in vIn)
-			if(vIn[i] != null)
-				topRow[i].concat(vIn[i]);
-				else{
-					topRow[i].concat("No Input");
-					nullIn = true;
-				}
-		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
-		if(nullIn)
-			displayInfo[1] = "Input Empty";
-			else
-			displayInfo[1] = out[0];
-			
+		let displayInfo = [];
+			displayInfo[0] = ("Mask Time: ");
+			displayInfo[1] = ("Cost: ");
+		if(this.timeReq != null){
+			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("Undefined.");
+		}
+		if(this.timeReq != null){
+			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		}else{
+			displayInfo[1] = displayInfo[1].concat("Undefined.");
+		}
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			let result = [vIn[0]*vIn[1]];
-			this.generateString(vIn, result);
-			return result;
-		}else{
-			return null;
-		}
+		return randomNumber;
 	}
 }
 
@@ -89,37 +129,43 @@ class rackBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Rack/Unrack";
-		let timeReq = 10;
+		let timeReq = null;
+	}
+
+	displayFields(div){
+		let timeReqIn = document.createElement("input");
+		timeReqIn.value = this.timeReq;
+		timeReqIn.placeholder = "Racking Time Required";
+		timeReqIn.id = "timeReq";
+		div.appendChild(timeReqIn);
+	}
+
+	setFields(){
+		if(document.getElementById("timeReq").value != "")
+			this.timeReq = document.getElementById("timeReq").value;
+		else
+			this.timeReq = null;
 	}
 
 	generateString(vIn, out){
-		let nullIn = false;
-		let topRow = [""]
-		let displayInfo = []
-		for(let i in vIn)
-			if(vIn[i] != null)
-				topRow[i].concat(vIn[i]);
-				else{
-					topRow[i].concat("No Input");
-					nullIn = true;
-				}
-		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
-		if(nullIn)
-			displayInfo[1] = "Input Empty";
-			else
-			displayInfo[1] = out[0];
-			
+		let displayInfo = [];
+			displayInfo[0] = ("Rack Time: ");
+			displayInfo[1] = ("Cost: ");
+		if(this.timeReq != null){
+			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("Undefined.");
+		}
+		if(this.timeReq != null){
+			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		}else{
+			displayInfo[1] = displayInfo[1].concat("Undefined.");
+		}
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			let result = [vIn[0]*vIn[1]];
-			this.generateString(vIn, result);
-			return result;
-		}else{
-			return null;
-		}
+		return randomNumber;
 	}
 }
 
@@ -133,34 +179,40 @@ class plateBrick {
 		this.depth = 0.00005;
 	}
 
+	displayFields(div){
+		let timeReqIn = document.createElement("input");
+		timeReqIn.value = this.timeReq;
+		timeReqIn.placeholder = "Masking Time Required";
+		timeReqIn.id = "timeReq";
+		div.appendChild(timeReqIn);
+	}
+
+	setFields(){
+		if(document.getElementById("timeReq").value != "")
+			this.timeReq = document.getElementById("timeReq").value;
+		else
+			this.timeReq = null;
+	}
+
 	generateString(vIn, out){
-		let nullIn = false;
-		let topRow = [""]
-		let displayInfo = []
-		for(let i in vIn)
-			if(vIn[i] != null)
-				topRow[i].concat(vIn[i]);
-				else{
-					topRow[i].concat("No Input");
-					nullIn = true;
-				}
-		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
-		if(nullIn)
-			displayInfo[1] = "Input Empty";
-			else
-			displayInfo[1] = out[0];
-			
+		let displayInfo = [];
+			displayInfo[0] = ("Mask Time: ");
+			displayInfo[1] = ("Cost: ");
+		if(this.timeReq != null){
+			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("Undefined.");
+		}
+		if(this.timeReq != null){
+			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		}else{
+			displayInfo[1] = displayInfo[1].concat("Undefined.");
+		}
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			let result = [vIn[0]*vIn[1]];
-			this.generateString(vIn, result);
-			return result;
-		}else{
-			return null;
-		}
+		return randomNumber;
 	}
 }
 
@@ -173,33 +225,40 @@ class qcBrick {
 		let timeReq = 10;
 	}
 
+	displayFields(div){
+		let timeReqIn = document.createElement("input");
+		timeReqIn.value = this.timeReq;
+		timeReqIn.placeholder = "QC Time Required";
+		timeReqIn.id = "timeReq";
+		div.appendChild(timeReqIn);
+	}
+
+	setFields(){
+		if(document.getElementById("timeReq").value != "")
+			this.timeReq = document.getElementById("timeReq").value;
+		else
+			this.timeReq = null;
+	}
+
 	generateString(vIn, out){
-		let nullIn = false;
-		let topRow = [""]
-		let displayInfo = []
-		for(let i in vIn)
-			if(vIn[i] != null)
-				topRow[i].concat(vIn[i]);
-				else{
-					topRow[i].concat("No Input");
-					nullIn = true;
-				}
-		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
-		if(nullIn)
-			displayInfo[1] = "Input Empty";
-			else
-			displayInfo[1] = out[0];
-			
+		let displayInfo = [];
+			displayInfo[0] = ("QC Time: ");
+			displayInfo[1] = ("Cost: ");
+		if(this.timeReq != null){
+			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("Undefined.");
+		}
+		if(this.timeReq != null){
+			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		}else{
+			displayInfo[1] = displayInfo[1].concat("Undefined.");
+		}
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			let result = [vIn[0]*vIn[1]];
-			return result;
-		}else{
-			return null;
-		}
+		return randomNumber;
 	}
 }
 
@@ -684,17 +743,17 @@ class Node {
 	}
 }
 	
-let brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true, 0),
-	new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true, 1),
-	new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
-	new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true, 3),
-	new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true, 4), 
-	new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true, 5),
-	new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true, 6),
-	new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true, 7),
-	new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true, 8),
-	new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true, 9),
-	new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true, 10)];
+let brickArray = [new brick(SELECTORGAP, 5, new baseBrick(), true, 0),
+	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new maskBrick(), true, 1),
+	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
+	new brick(SELECTORGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true, 3),
+	new brick(SELECTORGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true, 4), 
+	new brick(SELECTORGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true, 5),
+	new brick(SELECTORGAP*1, BRICKHEIGHT + 10, new splitBrick(), true, 6),
+	new brick(SELECTORGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true, 7),
+	new brick(SELECTORGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true, 8),
+	new brick(SELECTORGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true, 9),
+	new brick(SELECTORGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true, 10)];
 
 
 window.onload = function() {
@@ -708,12 +767,15 @@ window.onload = function() {
 		height = canvas.height = window.innerHeight*(4/5),
 		selectedBrick = null,
 		selectedNode = null,
+		displayedBrick = null;
 		clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
 		rngButton = document.getElementById("RNG");
 		rngButton.onclick = rng;
+		submitButton = document.getElementById("submit");
+		submitButton.onclick = submit;
+		infoDiv = document.getElementById("infoIn");
 	draw();
-
 	function draw() {
 		context.clearRect(0, 0, width, height);
 	
@@ -748,18 +810,26 @@ window.onload = function() {
 			if(brickArray[i] != null && brickArray[i] != undefined) 
 			iBrick = brickArray[i];
 			if(iBrick.checkClick(mouseX, mouseY)){
-				selectedBrick = iBrick;
-				xOff = mouseX - selectedBrick.posX;
-				yOff = mouseY - selectedBrick.posY;
-				if(iBrick.spawner){
-					selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
-						rect.top + SELECTHEIGHT + (NODEHEIGHT/2), iBrick.brickType, false, brickArray.length);
-				}
 				if(iBrick.xBox.checkClick(mouseX, mouseY)){
 					iBrick.suicide();
 					brickArray[i] = null;
 					selectedBrick = null;
+					displayedBrick = selectedBrick;
 					break;
+				}else{
+					selectedBrick = iBrick;
+					xOff = mouseX - selectedBrick.posX;
+					yOff = mouseY - selectedBrick.posY;
+					if(iBrick.spawner){
+
+							newBrickType =
+						selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
+							rect.top + SELECTHEIGHT + (NODEHEIGHT/2), new iBrick.brickType.constructor(), false, brickArray.length);
+					}
+					while(infoDiv.lastChild && infoDiv.lastChild != submitButton)
+						infoDiv.removeChild(infoDiv.lastChild);
+					displayedBrick = selectedBrick;
+					displayedBrick.brickType.displayFields(infoDiv);
 				}
 			}
 			
@@ -838,6 +908,12 @@ window.onload = function() {
 	function rng(){
 		randomNumber = Math.round(Math.random()*100);
 		draw();
+		draw();
+	}
+
+	function submit(){
+		if(displayedBrick != null)
+			displayedBrick.brickType.setFields();
 		draw();
 	}
 };
