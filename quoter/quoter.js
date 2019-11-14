@@ -408,7 +408,7 @@ class divBrick {
 }
 
 class brick {
-	constructor(posX, posY, brickType, spawner) {
+	constructor(posX, posY, brickType, spawner, id) {
 		this.posX = posX,
 		this.posY = posY,
 		this.brickType = brickType,
@@ -417,6 +417,7 @@ class brick {
 		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
 		this.vIn = [];
 		this.out = [];
+		this.id = id;
 		this.initializeNodes();
 	}
 
@@ -683,17 +684,17 @@ class Node {
 	}
 }
 	
-let brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true),
-	new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true),
-	new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true),
-	new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true),
-	new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true),
-	new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true),
-	new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true),
-	new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true),
-	new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true),
-	new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true),
-	new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true)];
+let brickArray = [new brick(SELECTERGAP, 5, new baseBrick(), true, 0),
+	new brick(SELECTERGAP*2 + BRICKWIDTH, 5, new maskBrick(), true, 1),
+	new brick(SELECTERGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
+	new brick(SELECTERGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true, 3),
+	new brick(SELECTERGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true, 4), 
+	new brick(SELECTERGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true, 5),
+	new brick(SELECTERGAP*1, BRICKHEIGHT + 10, new splitBrick(), true, 6),
+	new brick(SELECTERGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true, 7),
+	new brick(SELECTERGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true, 8),
+	new brick(SELECTERGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true, 9),
+	new brick(SELECTERGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true, 10)];
 
 
 window.onload = function() {
@@ -752,7 +753,7 @@ window.onload = function() {
 				yOff = mouseY - selectedBrick.posY;
 				if(iBrick.spawner){
 					selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
-						rect.top + SELECTHEIGHT + (NODEHEIGHT/2), iBrick.brickType, false);
+						rect.top + SELECTHEIGHT + (NODEHEIGHT/2), iBrick.brickType, false, brickArray.length);
 				}
 				if(iBrick.xBox.checkClick(mouseX, mouseY)){
 					iBrick.suicide();
