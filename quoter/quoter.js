@@ -6,9 +6,8 @@ const BRICKWIDTH = 200,
 	NODEHEIGHT = 30,
 	NODEWIDTH = 15,
 	XSIZE=15,
-	RACKMINUTE=60,
-	QCMINUTE=60,
-	MASKMINUTE=60,
+	QCMINUTE=120/60,
+	MASKMINUTE=100/60,
 	COPPER = "Copper",
 	STEEL = "Steel",
 	SS = "Stainless",
@@ -18,9 +17,10 @@ const BRICKWIDTH = 200,
 	SILVER = "Silver",
 	NIBRON = "Nibron",
 	TINLEAD = "Tin Lead",
+	CADMIUM = "Cadmium",
+	EN = "EN",
 	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL],
-	PLATEMATERIALS = [COPPER, NICKEL, GOLD, SILVER, NIBRON, TINLEAD];
-let randomNumber = 100;
+	PLATEMATERIALS = [CADMIUM, EN, GOLD, SILVER, NIBRON, TINLEAD];
 
 class baseBrick {
 	constructor() {
@@ -30,21 +30,28 @@ class baseBrick {
 		this.spawnText = "Base Material",
 		this.baseMaterial = null,
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	displayFields(div){
 		let bmSelector = document.createElement("select"),
 			optionList = this.getOptions(),
-			surfaceArea = document.createElement("input");
+			surfaceArea = document.createElement("input"),
+			quantity = document.createElement("input");
 		for(let i in optionList)
 			bmSelector.add(optionList[i]);
+		bmSelector.value = this.lastMetal;
 		surfaceArea.value = this.surfaceArea;
 		surfaceArea.placeholder = "Surface Area";
+		quantity.value = this.quantity;
+		quantity.placeholder = "Quantity";
+		quantity.id = "Quantity";
 		bmSelector.id = "bmSelector";
 		surfaceArea.id = "surfaceArea";
 		div.appendChild(bmSelector);
 		div.appendChild(surfaceArea);
+		div.appendChild(quantity);
 	}
 
 	getOptions(){
@@ -64,21 +71,34 @@ class baseBrick {
 			this.surfaceArea = document.getElementById("surfaceArea").value;
 		else
 			this.surfaceArea = null;
+		if(document.getElementById("Quantity").value != "")
+			this.quantity = document.getElementById("Quantity").value;
+		else
+			this.quantity = null;
 	}
 
 	generateString(vIn, out){
 		let displayInfo = [];
 			displayInfo[0] = ("Base Material: ");
 			displayInfo[1] = ("Surface Area: ");
+			displayInfo[2] = ("Quantity: ");
+
 		if(this.baseMaterial != null){
 			displayInfo[0] = displayInfo[0].concat(this.baseMaterial + ".");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("Undefined.");
 		}
+
 		if(this.surfaceArea != null){
 			displayInfo[1] = displayInfo[1].concat(this.surfaceArea + ".");
 		}else{
 			displayInfo[1] = displayInfo[1].concat("Undefined.");
+		}
+
+		if(this.quantity != null){
+			displayInfo[2] = displayInfo[2].concat(this.quantity + ".");
+		}else{
+			displayInfo[2] = displayInfo[2].concat("Undefined.");
 		}
 		return displayInfo;
 	}
@@ -96,7 +116,8 @@ class maskBrick {
 		this.spawnText = "Mask/Unmask",
 		this.timeReq = null,
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	displayFields(div){
@@ -132,7 +153,7 @@ class maskBrick {
 	}
 
 	calculate(vIn){
-		return vIn[0] + (this.timeReq * MASKMINUTE);
+		return (vIn[0] + (this.timeReq * MASKMINUTE));
 	}
 }
 
@@ -142,35 +163,36 @@ class rackBrick {
 		this.nodeIn = 1;
 		this.nodeOut = 1;
 		this.spawnText = "Rack/Unrack",
-		this.timeReq = null;
+		this.features = null,
+		this.quantity = null;
 	}
 
 	displayFields(div){
-		let timeReqIn = document.createElement("input");
-		timeReqIn.value = this.timeReq;
-		timeReqIn.placeholder = "Racking Time Required";
-		timeReqIn.id = "timeReq";
-		div.appendChild(timeReqIn);
+		let featuresIn = document.createElement("input");
+		featuresIn.value = this.features;
+		featuresIn.placeholder = "Racking Time Required";
+		featuresIn.id = "features";
+		div.appendChild(featuresIn);
 	}
 
 	setFields(){
-		if(document.getElementById("timeReq").value != "")
-			this.timeReq = document.getElementById("timeReq").value;
+		if(document.getElementById("features").value != "")
+			this.features = document.getElementById("features").value;
 		else
-			this.timeReq = null;
+			this.features = null;
 	}
 
 	generateString(vIn, out){
 		let displayInfo = [];
-			displayInfo[0] = ("Rack Time: ");
+			displayInfo[0] = ("Rack Features: ");
 			displayInfo[1] = ("Cost: ");
-		if(this.timeReq != null){
-			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
+		if(this.features != null){
+			displayInfo[0] = displayInfo[0].concat(this.features + ".");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("Undefined.");
 		}
-		if(this.timeReq != null){
-			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
+		if(this.features != null){
+			displayInfo[1] = displayInfo[1].concat("$" + (this.features*.5 + .5));
 		}else{
 			displayInfo[1] = displayInfo[1].concat("Undefined.");
 		}
@@ -178,7 +200,7 @@ class rackBrick {
 	}
 
 	calculate(vIn){
-		return vIn[0] + (this.timeReq * RACKMINUTE);;
+		return vIn[0] + this.features*.5 + .5;
 	}
 }
 
@@ -191,14 +213,17 @@ class plateBrick {
 		this.plateMat = null,
 		this.depth = null,
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
+
 		displayFields(div){
 		let plateSelector = document.createElement("select"),
 			optionList = this.getOptions(),
 			plateDepth = document.createElement("input");
 		for(let i in optionList)
 			plateSelector.add(optionList[i]);
+		plateSelector.value = this.lastMetal;
 		plateDepth.value = this.depth;
 		plateDepth.placeholder = "Plating Thickness";
 		plateSelector.id = "plateSelector";
@@ -245,23 +270,23 @@ class plateBrick {
 
 	getMatCost(material){
 		switch(material){
-			case "Copper":
-				return 0;
+			case "Cadmium":
+				return 0.08;
 				break;
-			case "Nickel":
-				return 0;
+			case "EN":
+				return 0.01597;
 				break;
 			case "Gold":
 				return 1.76;
 				break;
 			case "Silver":
-				return .125;
+				return 0.125;
 				break;
 			case "Nibron":
 				return 0;
 				break;
 			case "Tin Lead":
-				return 0;
+				return .19;
 				break;
 			default:
 				return 0;
@@ -270,7 +295,8 @@ class plateBrick {
 	}
 
 	calculate(vIn){
-		return vIn[0] + (this.depth * 10000 * this.getMatCost * this.surfaceArea);
+		console.log("Depth: " + this.depth + ". Mult: " + 10000 + ". Mat Cost: " + this.getMatCost(this.lastMetal) + ". Surface Area: " + this.surfaceArea);
+		return vIn[0] + (this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea);
 	}
 
 }
@@ -283,7 +309,8 @@ class qcBrick {
 		this.spawnText = "Quality Control",
 		this.timeReq = null,
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	displayFields(div){
@@ -319,7 +346,7 @@ class qcBrick {
 	}
 
 	calculate(vIn){
-		return randomNumber;
+		return vIn[0] + (this.timeReq * QCMINUTE);
 	}
 }
 
@@ -330,7 +357,8 @@ class totalBrick {
 		this.nodeOut = 0,
 		this.spawnText = "Total",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	displayFields(div){
@@ -350,7 +378,6 @@ class totalBrick {
 		if(this.lastMetal != null){
 			displayInfo[1] = displayInfo[1].concat(" " + this.lastMetal);
 		}else{
-			console.log(displayInfo[1])
 			displayInfo[1] = displayInfo[1].concat(" No Metal");
 		}
 		
@@ -369,7 +396,8 @@ class splitBrick {
 		this.nodeOut = 2,
 		this.spawnText = "Splitter",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	generateString(vIn, out){
@@ -399,7 +427,8 @@ class addBrick {
 		this.nodeOut = 1,
 		this.spawnText = "Adder",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	generateString(vIn, out){
@@ -439,7 +468,8 @@ class subBrick {
 		this.nodeOut = 1,
 		this.spawnText = "Subtracter",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	generateString(vIn, out){
@@ -479,7 +509,8 @@ class multBrick {
 		this.nodeOut = 1,
 		this.spawnText = "Multiplier",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	generateString(vIn, out){
@@ -519,7 +550,8 @@ class divBrick {
 		this.nodeOut = 1,
 		this.spawnText = "Divider",
 		this.lastMetal = null,
-		this.surfaceArea = null;
+		this.surfaceArea = null,
+		this.quantity = null;
 	}
 
 	generateString(vIn, out){
@@ -655,8 +687,8 @@ class brick {
 		for (let i = 0; i < this.brickType.nodeIn; i++){
 			this.vIn[i] = this.nodeArray[i].value;
 		}
-
-		this.out = this.brickType.calculate(this.vIn);
+		if(!this.spawner)
+			this.out = this.brickType.calculate(this.vIn);
 	}
 
 	suicide(){
@@ -783,6 +815,8 @@ class Node {
 				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
 			if(this.connectedNode.iBrick.brickType.surfaceArea != null)
 				this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
+			if(this.connectedNode.iBrick.brickType.quantity != null)
+				this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
 		}
 	}
 
@@ -866,8 +900,6 @@ window.onload = function() {
 		displayedBrick = null;
 		clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
-		rngButton = document.getElementById("RNG");
-		rngButton.onclick = rng;
 		submitButton = document.getElementById("submit");
 		submitButton.onclick = submit;
 		infoDiv = document.getElementById("infoIn");
@@ -998,12 +1030,6 @@ window.onload = function() {
 		for (iterator = 11; iterator < brickArray.length; iterator++){
 			brickArray[iterator] = null;
 		}
-		draw();
-	}
-
-	function rng(){
-		randomNumber = Math.round(Math.random()*100);
-		draw();
 		draw();
 	}
 
