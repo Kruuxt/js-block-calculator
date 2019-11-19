@@ -30,12 +30,56 @@ class basicBrick{
 		this.spawnText = "Undefined Brick",
 		this.lastMetal = null,
 		this.surfaceArea = null,
+		this.iBrick = null,
 		this.quantity = null;
 	}
 	displayFields(div){}
 	setFields(){}
 	generateString(vIn, out){ return null }
 	calculate(vIn){ return null }
+	initialize(iBrick){
+		console.log("Initializing iBrick from " + this.iBrick);
+		this.iBrick = iBrick;
+		console.log("to" + this.iBrick);
+	}
+}
+
+class mathBrick extends basicBrick{
+	constructor(){
+		super();
+		this.input1 = null,
+		this.input2 = null;
+	}
+
+	displayFields(div){
+		let in1Field = document.createElement("input");
+		let in2Field = document.createElement("input");
+		in1Field.id = "in1Field";
+		in2Field.id = "in2Field";
+		in1Field.value = this.input1;
+		in2Field.value = this.input2;
+		in1Field.placeholder = "Value 1";
+		in2Field.placeholder = "Value 2";
+		div.appendChild(in1Field);
+		div.appendChild(in2Field);
+	}
+
+	setFields(){
+		if(document.getElementById("in1Field").value != ""){
+			this.iBrick.nodeArray[0].hide();
+			this.input1 = document.getElementById("in1Field").value;
+		} else {
+			this.iBrick.nodeArray[0].show();
+			this.input1 = null;
+		}
+		if(document.getElementById("in2Field").value != ""){
+			this.iBrick.nodeArray[1].hide();
+			this.input2 = document.getElementById("in2Field").value;
+		} else {
+			this.iBrick.nodeArray[1].show();
+			this.input2 = null;
+		}
+	}
 }
 
 class baseBrick extends basicBrick{
@@ -420,7 +464,7 @@ class splitBrick extends basicBrick{
 	}
 }
 
-class addBrick extends basicBrick{
+class addBrick extends mathBrick{
 	constructor() {
 		super();
 		this.color = "yellow",
@@ -431,17 +475,23 @@ class addBrick extends basicBrick{
 
 	generateString(vIn, out){
 		let nullIn = false;
-		let topRow = ["", ""]
-		let displayInfo = []
-		for(let i in vIn){
-			if(vIn[i] != null){
-				topRow[i] = topRow[i].concat(vIn[i]);
-			}else{
-				topRow[i] = topRow[i].concat("No Input");
-				nullIn = true;
-			}
+		let displayInfo = ["",""]
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " + ");
+		}else if(vIn[0] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[0] + " + ");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input" + " + ");
+			nullIn = true;
 		}
-		displayInfo[0] = (topRow[0] + " + " + topRow[1] + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+		}else if(vIn[1] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input =");
+			nullIn = true;
+		}
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -451,15 +501,20 @@ class addBrick extends basicBrick{
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			return vIn[0]+vIn[1];
+		let num1 = vIn[0],
+			num2 = vIn[1];
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
+
+		if(num1 != null && num2 != null){
+			return (parseInt(num1)+parseInt(num2));
 		}else{
 			return null;
 		}
 	}
 }
 
-class subBrick extends basicBrick{
+class subBrick extends mathBrick{
 	constructor() {
 		super();
 		this.color = "yellow",
@@ -470,17 +525,23 @@ class subBrick extends basicBrick{
 
 	generateString(vIn, out){
 		let nullIn = false;
-		let topRow = ["", ""]
-		let displayInfo = []
-		for(let i in vIn){
-			if(vIn[i] != null){
-				topRow[i] = topRow[i].concat(vIn[i]);
-			}else{
-				topRow[i] = topRow[i].concat("No Input");
-				nullIn = true;
-			}
+		let displayInfo = ["",""]
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " - ");
+		}else if(vIn[0] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[0] + " - ");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input" + " - ");
+			nullIn = true;
 		}
-		displayInfo[0] = (topRow[0] + " - " + topRow[1] + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+		}else if(vIn[1] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input =");
+			nullIn = true;
+		}
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -490,15 +551,20 @@ class subBrick extends basicBrick{
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			return vIn[0]-vIn[1];
+		let num1 = vIn[0],
+			num2 = vIn[1];
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
+
+		if(num1 != null && num2 != null){
+			return (parseInt(num1)-parseInt(num2));
 		}else{
 			return null;
 		}
 	}
 }
 
-class multBrick extends basicBrick{
+class multBrick extends mathBrick{
 	constructor() {
 		super();
 		this.color = "yellow",
@@ -509,17 +575,23 @@ class multBrick extends basicBrick{
 
 	generateString(vIn, out){
 		let nullIn = false;
-		let topRow = ["", ""]
-		let displayInfo = []
-		for(let i in vIn){
-			if(vIn[i] != null){
-				topRow[i] = topRow[i].concat(vIn[i]);
-			}else{
-				topRow[i] = topRow[i].concat("No Input");
-				nullIn = true;
-			}
+		let displayInfo = ["",""]
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " x ");
+		}else if(vIn[0] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[0] + " x ");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input" + " x ");
+			nullIn = true;
 		}
-		displayInfo[0] = (topRow[0] + " * " + topRow[1] + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+		}else if(vIn[1] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input =");
+			nullIn = true;
+		}
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -529,15 +601,20 @@ class multBrick extends basicBrick{
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			return vIn[0]*vIn[1];
+		let num1 = vIn[0],
+			num2 = vIn[1];
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
+
+		if(num1 != null && num2 != null){
+			return (parseInt(num1)*parseInt(num2));
 		}else{
 			return null;
 		}
 	}
 }
 
-class divBrick extends basicBrick{
+class divBrick extends mathBrick{
 	constructor() {
 		super();
 		this.color = "yellow",
@@ -548,17 +625,23 @@ class divBrick extends basicBrick{
 
 	generateString(vIn, out){
 		let nullIn = false;
-		let topRow = ["", ""]
-		let displayInfo = []
-		for(let i in vIn){
-			if(vIn[i] != null){
-				topRow[i] = topRow[i].concat(vIn[i]);
-			}else{
-				topRow[i] = topRow[i].concat("No Input");
-				nullIn = true;
-			}
+		let displayInfo = ["",""]
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " / ");
+		}else if(vIn[0] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[0] + " / ");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input" + " / ");
+			nullIn = true;
 		}
-		displayInfo[0] = (topRow[0] + " / " + topRow[1] + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+		}else if(vIn[1] != null){
+			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+		}else{
+			displayInfo[0] = displayInfo[0].concat("No Input =");
+			nullIn = true;
+		}
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -568,8 +651,13 @@ class divBrick extends basicBrick{
 	}
 
 	calculate(vIn){
-		if(vIn[0] != null && vIn[1] != null){
-			return vIn[0]/vIn[1];
+		let num1 = vIn[0],
+			num2 = vIn[1];
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
+
+		if(num1 != null && num2 != null){
+			return (parseInt(num1)/parseInt(num2));
 		}else{
 			return null;
 		}
@@ -589,7 +677,6 @@ class brick {
 		this.id = id;
 		this.initializeNodes();
 	}
-
 
 	initializeNodes(){
 		//Input nodes
@@ -741,16 +828,26 @@ class xBox {
 
 class Node {
 	constructor(inNode, iBrick, posX, posY, startX, startY, id) {
-		this.inNode = inNode;
-		this.iBrick = iBrick;
-		this.posX = posX;
-		this.posY = posY;
-		this.startX = startX;
-		this.startY = startY;
-		this.connectedNode = null;
-		this.id = id;
-		this.value = null;
-		this.isConnected = false;
+		this.inNode = inNode,
+		this.iBrick = iBrick,
+		this.posX = posX,
+		this.posY = posY,
+		this.startX = startX,
+		this.startY = startY,
+		this.connectedNode = null,
+		this.id = id,
+		this.value = null,
+		this.isConnected = false,
+		this.hidden = false;
+	}
+
+	hide(){
+		this.disconnect();
+		this.hidden = true;
+	}
+
+	show(){
+		this.hidden = false;
 	}
 
 	hitBox(){
@@ -852,6 +949,7 @@ class Node {
 	}
 
 	checkClick(x, y){
+		if(this.hidden) return false;
 		if(this.hitBox().x1 < x && this.hitBox().x2 > x
 		&& this.hitBox().y1 < y && this.hitBox().y2 > y
 		&& !this.iBrick.spawner){
@@ -862,14 +960,18 @@ class Node {
 	}
 
 	draw(context){
-		context.lineWidth = 2;
-		context.fillStyle = this.iBrick.brickType.color;
-		context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
-		context.fillStyle = "black";
-		context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+		if(!this.hidden){
+			context.lineWidth = 2;
+			context.fillStyle = this.iBrick.brickType.color;
+			context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+			context.fillStyle = "black";
+			context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+		}
 	}
 }
-	
+
+
+
 let brickArray = [new brick(SELECTORGAP, 5, new baseBrick(), true, 0),
 	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new maskBrick(), true, 1),
 	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
@@ -895,6 +997,8 @@ window.onload = function() {
 		selectedBrick = null,
 		selectedNode = null,
 		displayedBrick = null;
+		for(let i in brickArray)
+			brickArray[i].brickType.initialize(brickArray[i]);
 		clearScreenButton = document.getElementById("sCButton");
 		clearScreenButton.onclick = clearScreen;
 		submitButton = document.getElementById("submit");
@@ -946,10 +1050,9 @@ window.onload = function() {
 					xOff = mouseX - selectedBrick.posX;
 					yOff = mouseY - selectedBrick.posY;
 					if(iBrick.spawner){
-
-							newBrickType =
 						selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
 							rect.top + SELECTHEIGHT + (NODEHEIGHT/2), new iBrick.brickType.constructor(), false, brickArray.length);
+						selectedBrick.brickType.initialize(selectedBrick);
 					}
 					while(infoDiv.lastChild && infoDiv.lastChild != submitButton)
 						infoDiv.removeChild(infoDiv.lastChild);
