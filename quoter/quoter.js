@@ -8,17 +8,9 @@ const BRICKWIDTH = 200,
 	XSIZE=15,
 	QCMINUTE=120/60,
 	MASKMINUTE=100/60,
-	COPPER = "Copper",
-	STEEL = "Steel",
-	SS = "Stainless",
-	ALUMINUM = "Aluminum",
-	NICKEL= "Nickel",
-	GOLD = "Gold",
-	SILVER = "Silver",
-	NIBRON = "Nibron",
-	TINLEAD = "Tin Lead",
-	CADMIUM = "Cadmium",
-	EN = "EN",
+	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
+	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
+	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN",
 	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL],
 	PLATEMATERIALS = [CADMIUM, EN, GOLD, SILVER, NIBRON, TINLEAD];
 
@@ -42,6 +34,23 @@ class basicBrick{
 		this.iBrick = iBrick;
 		console.log("to" + this.iBrick);
 	}
+
+	getValue(element){
+		if(element.value != "")
+			return element.value;
+		else
+			return null;
+	}
+	
+	appendVal(stringIn, value, undef){
+		if(value != null){
+			return stringIn.concat(value);
+		}else if(undef){
+			return stringIn.concat("Undefined");
+		}else{
+			return stringIn.concat("No Value");
+		}
+	}
 }
 
 class mathBrick extends basicBrick{
@@ -54,31 +63,33 @@ class mathBrick extends basicBrick{
 	displayFields(div){
 		let in1Field = document.createElement("input");
 		let in2Field = document.createElement("input");
+
 		in1Field.id = "in1Field";
 		in2Field.id = "in2Field";
+
 		in1Field.value = this.input1;
 		in2Field.value = this.input2;
+
 		in1Field.placeholder = "Value 1";
 		in2Field.placeholder = "Value 2";
+
 		div.appendChild(in1Field);
 		div.appendChild(in2Field);
 	}
 
 	setFields(){
-		if(document.getElementById("in1Field").value != ""){
+		if(document.getElementById("in1Field").value != "")
 			this.iBrick.nodeArray[0].hide();
-			this.input1 = document.getElementById("in1Field").value;
-		} else {
+		else 
 			this.iBrick.nodeArray[0].show();
-			this.input1 = null;
-		}
-		if(document.getElementById("in2Field").value != ""){
+
+		if(document.getElementById("in2Field").value != "")
 			this.iBrick.nodeArray[1].hide();
-			this.input2 = document.getElementById("in2Field").value;
-		} else {
+		else 
 			this.iBrick.nodeArray[1].show();
-			this.input2 = null;
-		}
+
+		this.input1 = this.getValue(document.getElementById("in1Field"));
+		this.input2 = this.getValue(document.getElementById("in2Field"));
 	}
 }
 
@@ -97,16 +108,21 @@ class baseBrick extends basicBrick{
 			optionList = this.getOptions(),
 			surfaceArea = document.createElement("input"),
 			quantity = document.createElement("input");
+
 		for(let i in optionList)
 			bmSelector.add(optionList[i]);
+
 		bmSelector.value = this.lastMetal;
 		surfaceArea.value = this.surfaceArea;
-		surfaceArea.placeholder = "Surface Area";
 		quantity.value = this.quantity;
+
+		surfaceArea.placeholder = "Surface Area";
 		quantity.placeholder = "Quantity";
-		quantity.id = "Quantity";
+
 		bmSelector.id = "bmSelector";
 		surfaceArea.id = "surfaceArea";
+		quantity.id = "Quantity";
+
 		div.appendChild(bmSelector);
 		div.appendChild(surfaceArea);
 		div.appendChild(quantity);
@@ -125,41 +141,16 @@ class baseBrick extends basicBrick{
 	setFields(){
 		this.baseMaterial = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
 		this.lastMetal = this.baseMaterial;
-		console.log(document.getElementById("surfaceArea").value != "");
-		if(document.getElementById("surfaceArea").value != "")
-			this.surfaceArea = document.getElementById("surfaceArea").value;
-		else
-			this.surfaceArea = null;
-		console.log(this.surfaceArea);
-		if(document.getElementById("Quantity").value != "")
-			this.quantity = document.getElementById("Quantity").value;
-		else
-			this.quantity = null;
+		this.surfaceArea = this.getValue(document.getElementById("surfaceArea"));
+		this.quantity = this.getValue(document.getElementById("Quantity"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = [];
-			displayInfo[0] = ("Base Material: ");
-			displayInfo[1] = ("Surface Area: ");
-			displayInfo[2] = ("Quantity: ");
+		let displayInfo = ["Base Material: ", "Surface Area: ", "Quantity: "];
 
-		if(this.baseMaterial != null){
-			displayInfo[0] = displayInfo[0].concat(this.baseMaterial + ".");
-		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined.");
-		}
-		
-		if(this.surfaceArea != null){
-			displayInfo[1] = displayInfo[1].concat(this.surfaceArea + ".");
-		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined.");
-		}
-
-		if(this.quantity != null){
-			displayInfo[2] = displayInfo[2].concat(this.quantity + ".");
-		}else{
-			displayInfo[2] = displayInfo[2].concat("Undefined.");
-		}
+		displayInfo[0] = this.appendVal(displayInfo[0], this.baseMaterial, true);
+		displayInfo[1] = this.appendVal(displayInfo[1], this.surfaceArea, true);
+		displayInfo[2] = this.appendVal(displayInfo[2], this.quantity, true);
 		return displayInfo;
 	}
 
@@ -187,26 +178,13 @@ class maskBrick extends basicBrick{
 	}
 
 	setFields(){
-		if(document.getElementById("timeReq").value != "")
-			this.timeReq = document.getElementById("timeReq").value;
-		else
-			this.timeReq = null;
+		this.timeReq = this.getValue(document.getElementById("timeReq"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = [];
-			displayInfo[0] = ("Mask Time: ");
-			displayInfo[1] = ("Cost: ");
-		if(this.timeReq != null){
-			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
-		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined.");
-		}
-		if(this.timeReq != null){
-			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
-		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined.");
-		}
+		let displayInfo = ["Mask Time: ", "Total Cost: "];
+		displayInfo[0] = this.appendVal(displayInfo[0], this.timeReq, true);
+		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.timeReq) * MASKMINUTE, true);
 		return displayInfo;
 	}
 
@@ -234,26 +212,13 @@ class rackBrick extends basicBrick{
 	}
 
 	setFields(){
-		if(document.getElementById("features").value != "")
-			this.features = document.getElementById("features").value;
-		else
-			this.features = null;
+		this.features = this.getValue(document.getElementById("features"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = [];
-			displayInfo[0] = ("Rack Features: ");
-			displayInfo[1] = ("Cost: ");
-		if(this.features != null){
-			displayInfo[0] = displayInfo[0].concat(this.features + ".");
-		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined.");
-		}
-		if(this.features != null){
-			displayInfo[1] = displayInfo[1].concat("$" + (this.features*.5 + .5));
-		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined.");
-		}
+		let displayInfo = ["Rack Features: ", "Total Cost: "];
+		displayInfo[0] = this.appendVal(displayInfo[0], this.features, true);
+		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.features) * .5 + .5, true);
 		return displayInfo;
 	}
 
@@ -270,22 +235,33 @@ class plateBrick extends basicBrick{
 		this.nodeOut = 1,
 		this.spawnText = "Plating Layer",
 		this.plateMat = null,
-		this.depth = null;
+		this.depth = null,
+		this.multiplier = 1.8;
 	}
 
 		displayFields(div){
 		let plateSelector = document.createElement("select"),
 			optionList = this.getOptions(),
-			plateDepth = document.createElement("input");
+			plateDepth = document.createElement("input"),
+			multiplier = document.createElement("input");
+
 		for(let i in optionList)
 			plateSelector.add(optionList[i]);
+
 		plateSelector.value = this.lastMetal;
 		plateDepth.value = this.depth;
+		multiplier.value = this.multiplier;
+
 		plateDepth.placeholder = "Plating Thickness";
+		multiplier.placeholder = "Profit Multiplier";
+
+		multiplier.id = "multiplier";
 		plateSelector.id = "plateSelector";
 		plateDepth.id = "plateDepth";
+
 		div.appendChild(plateSelector);
 		div.appendChild(plateDepth);
+		div.appendChild(multiplier);
 	}
 
 	getOptions(){
@@ -301,26 +277,14 @@ class plateBrick extends basicBrick{
 	setFields(){
 		this.plateMat = PLATEMATERIALS[document.getElementById("plateSelector").selectedIndex];
 		this.lastMetal = this.plateMat;
-		if(document.getElementById("plateDepth").value != "")
-			this.depth = document.getElementById("plateDepth").value;
-		else
-			this.depth = null;
+		this.depth = this.getValue(document.getElementById("plateDepth"));
+		this.multiplier = this.getValue(document.getElementById("multiplier"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = [];
-			displayInfo[0] = ("Plate Mat.: ");
-			displayInfo[1] = ("Depth: ");
-		if(this.plateMat != null){
-			displayInfo[0] = displayInfo[0].concat(this.plateMat);
-		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined");
-		}
-		if(this.depth != null){
-			displayInfo[1] = displayInfo[1].concat(this.depth);
-		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined");
-		}
+		let displayInfo = ["Plate Mat.: ", "Depth: "];
+		displayInfo[0] = this.appendVal(displayInfo[0], this.plateMat, true);
+		displayInfo[1] = this.appendVal(displayInfo[1], this.depth, true);
 		return displayInfo;
 	}
 
@@ -376,26 +340,15 @@ class qcBrick extends basicBrick{
 	}
 
 	setFields(){
-		if(document.getElementById("timeReq").value != "")
-			this.timeReq = document.getElementById("timeReq").value;
-		else
-			this.timeReq = null;
+			this.timeReq = this.getValue(document.getElementById("timeReq"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = [];
-			displayInfo[0] = ("QC Time: ");
-			displayInfo[1] = ("Cost: ");
-		if(this.timeReq != null){
-			displayInfo[0] = displayInfo[0].concat(this.timeReq + ".");
-		}else{
-			displayInfo[0] = displayInfo[0].concat("Undefined.");
-		}
-		if(this.timeReq != null){
-			displayInfo[1] = displayInfo[1].concat("$" + this.timeReq + ".");
-		}else{
-			displayInfo[1] = displayInfo[1].concat("Undefined.");
-		}
+		let displayInfo = ["QC Time: ", "Cost: "];
+
+		displayInfo[0] = this.appendVal(displayInfo[0], this.timeReq, true);
+		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.timeReq) * QCMINUTE, true);
+
 		return displayInfo;
 	}
 
@@ -416,13 +369,9 @@ class totalBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["Total: $", "Piece: $", "Finish Coat: "];
 
-		if(vIn[0] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[0]);
-		}else{
-			displayInfo[0] = displayInfo[0].concat("No Input");
-		}
+		displayInfo[0] = this.appendVal(displayInfo[0], vIn[0], false);
 		if(vIn[0] != null && this.quantity != null && this.quantity != 0){
-			displayInfo[1] = displayInfo[1].concat(vIn[0]/this.quantity);
+			displayInfo[1] = this.appendVal(displayInfo[0], vIn[0]/this.quantity, false);
 		}else{
 			displayInfo[1] = displayInfo[1].concat("No Input");
 		}
