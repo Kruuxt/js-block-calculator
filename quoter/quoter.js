@@ -26,9 +26,13 @@ class basicBrick{
 		this.quantity = null;
 	}
 	displayFields(div){}
+
 	setFields(){}
+
 	generateString(vIn, out){ return null }
+
 	calculate(vIn){ return null }
+	
 	initialize(iBrick){
 		console.log("Initializing iBrick from " + this.iBrick);
 		this.iBrick = iBrick;
@@ -282,9 +286,10 @@ class plateBrick extends basicBrick{
 	}
 
 	generateString(vIn, out){
-		let displayInfo = ["Plate Mat.: ", "Depth: "];
+		let displayInfo = ["Plate Mat.: ", "Depth: ", "Mat. Cost: $"];
 		displayInfo[0] = this.appendVal(displayInfo[0], this.plateMat, true);
 		displayInfo[1] = this.appendVal(displayInfo[1], this.depth, true);
+		displayInfo[2] = this.appendVal(displayInfo[2], this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea, false);
 		return displayInfo;
 	}
 
@@ -292,31 +297,24 @@ class plateBrick extends basicBrick{
 		switch(material){
 			case "Cadmium":
 				return 0.08;
-				break;
 			case "EN":
 				return 0.01597;
-				break;
 			case "Gold":
 				return 1.76;
-				break;
 			case "Silver":
-				return 0.125;
-				break;
+				return 0.012;
 			case "Nibron":
 				return 0;
-				break;
 			case "Tin Lead":
 				return .19;
-				break;
 			default:
 				return 0;
-				break;
 		}
 	}
 
 	calculate(vIn){
 		console.log("Depth: " + this.depth + ". Mult: " + 10000 + ". Mat Cost: " + this.getMatCost(this.lastMetal) + ". Surface Area: " + this.surfaceArea);
-		return vIn[0] + (this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea);
+		return vIn[0] + (this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea * this.multiplier);
 	}
 
 }
@@ -367,20 +365,11 @@ class totalBrick extends basicBrick{
 	}
 
 	generateString(vIn, out){
-		let displayInfo = ["Total: $", "Piece: $", "Finish Coat: "];
+		let displayInfo = ["Total: $ ", "Piece: $ ", "Finish Coat: "];
+		displayInfo[0] = this.appendVal(displayInfo[0], Math.round(parseFloat(vIn[0])*parseFloat(this.quantity)*1000)/1000, false);
+		displayInfo[1] = this.appendVal(displayInfo[1], Math.round(vIn[0]*1000)/1000, false);
+		displayInfo[2] = this.appendVal(displayInfo[2], this.lastMetal, false);
 
-		displayInfo[0] = this.appendVal(displayInfo[0], vIn[0], false);
-		if(vIn[0] != null && this.quantity != null && this.quantity != 0){
-			displayInfo[1] = this.appendVal(displayInfo[0], vIn[0]/this.quantity, false);
-		}else{
-			displayInfo[1] = displayInfo[1].concat("No Input");
-		}
-		if(this.lastMetal != null){
-			displayInfo[2] = displayInfo[2].concat(this.lastMetal);
-		}else{
-			displayInfo[2] = displayInfo[2].concat("No Metal");
-		}
-		
 		return displayInfo;
 	}
 }
@@ -394,13 +383,12 @@ class splitBrick extends basicBrick{
 		this.spawnText = "Splitter";
 	}
 	generateString(vIn, out){
-		let displayInfo = [];
-		if(vIn[0] === null){
-			displayInfo[0] = "Input Empty";
-		} else {
-			displayInfo[0] = vIn[0];
-			displayInfo[1] = [out + " | " + out];
-		}
+		let displayInfo = ["" ,""];
+		displayInfo[0] = this.appendVal(displayInfo[0], vIn[0], false);
+		displayInfo[1] = this.appendVal(displayInfo[1], out, false);
+		displayInfo[1] = this.appendVal(displayInfo[1], " | ", false);
+		displayInfo[1] = this.appendVal(displayInfo[1], out, false);
+		
 		return displayInfo;
 	}
 
@@ -922,11 +910,11 @@ class Node {
 
 
 let brickArray = [new brick(SELECTORGAP, 5, new baseBrick(), true, 0),
-	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new maskBrick(), true, 1),
-	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
-	new brick(SELECTORGAP*4 + BRICKWIDTH*3, 5, new plateBrick(), true, 3),
-	new brick(SELECTORGAP*5 + BRICKWIDTH*4, 5, new qcBrick(), true, 4), 
-	new brick(SELECTORGAP*6 + BRICKWIDTH*5, 5, new totalBrick(), true, 5),
+	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new plateBrick(), true, 1),
+	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new totalBrick(), true, 2),
+	new brick(SELECTORGAP*4 + BRICKWIDTH*3, 5, new maskBrick(), true, 3),
+	new brick(SELECTORGAP*5 + BRICKWIDTH*4, 5, new rackBrick(), true, 4), 
+	new brick(SELECTORGAP*6 + BRICKWIDTH*5, 5, new qcBrick(), true, 5),
 	new brick(SELECTORGAP*1, BRICKHEIGHT + 10, new splitBrick(), true, 6),
 	new brick(SELECTORGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true, 7),
 	new brick(SELECTORGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true, 8),
@@ -999,8 +987,16 @@ window.onload = function() {
 					xOff = mouseX - selectedBrick.posX;
 					yOff = mouseY - selectedBrick.posY;
 					if(iBrick.spawner){
-						selectedBrick = brickArray[brickArray.length] = new brick(mouseX-xOff,
-							rect.top + SELECTHEIGHT + (NODEHEIGHT/2), new iBrick.brickType.constructor(), false, brickArray.length);
+						newId = brickArray.length;
+						for(let i in brickArray){
+							if(brickArray[i] === null){
+								console.log(i + " is null.");
+								newId = i;
+								break;
+							}
+						}
+						selectedBrick = brickArray[newId] = new brick(mouseX-xOff,
+							rect.top + SELECTHEIGHT + (NODEHEIGHT/2), new iBrick.brickType.constructor(), false, newId);
 						selectedBrick.brickType.initialize(selectedBrick);
 					}
 					while(infoDiv.lastChild && infoDiv.lastChild != submitButton)
@@ -1027,11 +1023,18 @@ window.onload = function() {
 	}
 
 	document.body.addEventListener("mousedown", function(event) {
+		if(event.which === 13)
+			submit();
 		updateMouse();
 		clickChecker();
 		document.body.addEventListener("mousemove", onMouseMove);
 		document.body.addEventListener("mouseup", onMouseUp);
 		draw();
+	});
+
+	document.body.addEventListener("keypress", function(event) {
+		if(event.which === 13)
+			submit();
 	});
 
 	function onMouseMove(event) {
@@ -1086,6 +1089,7 @@ window.onload = function() {
 	function submit(){
 		if(displayedBrick != null)
 			displayedBrick.brickType.setFields();
+		draw();
 		draw();
 	}
 };
