@@ -8,8 +8,8 @@ const BRICKWIDTH = 200,
 	XSIZE=15,
 	QCMINUTE=120/60,
 	MASKMINUTE=100/60,
-	MATHCOLOR = "#57A773", OPERATIONCOLOR = "#6A8EAE", BASECOLOR = "#9BD1E5", BGCOLOR = "#D1FAFF",
-	SPLITCOLOR = "#114B5F", PLATECOLOR = "#157145",
+	MATHCOLOR = "#57A773", OPERATIONCOLOR = "#6A8EAE", BGCOLOR = "#D1FAFF",
+	SPLITCOLOR = "#1a7391", PLATECOLOR = "#157145", BASECOLOR = "#9BD1E5",
 	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
 	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
 	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN", KOVAR = "Kovar"
@@ -178,9 +178,9 @@ class baseBrick extends basicBrick{
 			bmSelector.add(this.getOptions()[i]);
 
 		//Set value to any previous user inputs.
-		bmSelector.value = super.lastMetal;
-		surfaceArea.value = super.surfaceArea;
-		quantity.value = super.quantity;
+		bmSelector.value = this.lastMetal;
+		surfaceArea.value = this.surfaceArea;
+		quantity.value = this.quantity;
 
 		//Add grayed text to textboxes when empty.
 		surfaceArea.placeholder = "Surface Area";
@@ -209,17 +209,17 @@ class baseBrick extends basicBrick{
 	}
 
 	setFields(){
-		super.lastMetal = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
-		super.surfaceArea = super.getValue(document.getElementById("surfaceArea"));
-		super.quantity = super.getValue(document.getElementById("Quantity"));
+		this.lastMetal = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
+		this.surfaceArea = super.getValue(document.getElementById("surfaceArea"));
+		this.quantity = super.getValue(document.getElementById("Quantity"));
 	}
 
 	generateString(vIn, out){
 		let displayInfo = ["Base Material: ", "Surface Area: ", "Quantity: "];
 
-		displayInfo[0] = super.appendVal(displayInfo[0], super.lastMetal, true);
-		displayInfo[1] = super.appendVal(displayInfo[1], super.surfaceArea, true);
-		displayInfo[2] = super.appendVal(displayInfo[2], super.quantity, true);
+		displayInfo[0] = super.appendVal(displayInfo[0], this.lastMetal, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.surfaceArea, true);
+		displayInfo[2] = super.appendVal(displayInfo[2], this.quantity, true);
 		return displayInfo;
 	}
 }
@@ -301,7 +301,7 @@ class rackBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["Price per piece: ", "Price for all: "];
 		displayInfo[0] = super.appendVal(displayInfo[0], this.pricePerPiece, true);
-		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.pricePerPiece) * super.quantity, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.pricePerPiece) * this.quantity, true);
 		return displayInfo;
 	}
 
@@ -374,8 +374,8 @@ class plateBrick extends basicBrick{
 
 	setFields(){
 		this.plateMat = PLATEMATERIALS[document.getElementById("plateSelector").selectedIndex];
-		this.under = super.lastMetal;
-		super.lastMetal = this.plateMat;
+		this.under = this.lastMetal;
+		this.lastMetal = this.plateMat;
 		this.depth = super.getValue(document.getElementById("plateDepth"));
 		this.multiplier = super.getValue(document.getElementById("multiplier"));
 	}
@@ -414,7 +414,7 @@ class plateBrick extends basicBrick{
 		displayInfo[0] = super.appendVal(displayInfo[0], this.plateMat, true);
 		displayInfo[1] = super.appendVal(displayInfo[1], this.depth, true);
 		displayInfo[2] = super.appendVal(displayInfo[2], this.depth * 10000
-			* this.getMatCost(super.lastMetal) * super.surfaceArea, false);
+			* this.getMatCost(this.lastMetal) * this.surfaceArea, false);
 		return displayInfo;
 	}
 
@@ -429,7 +429,7 @@ class plateBrick extends basicBrick{
 			return 2.5;
 		if(under === "Kovar" && over === "Gold")
 			return 2.5;
-		if(over === "gold")
+		if(over === "Gold")
 			return 1.8;
 		return 1;
 	}
@@ -463,10 +463,10 @@ class plateBrick extends basicBrick{
 
 	calculate(vIn){
 		if(this.plateMat != "Tin Lead")
-			return vIn[0] + (this.depth * 10000 * this.getMatCost(super.lastMetal)
-				* super.surfaceArea * this.multiplier);
+			return vIn[0] + (this.depth * 10000 * this.getMatCost(this.lastMetal)
+				* this.surfaceArea * this.multiplier);
 		else
-			return vIn[0] + (this.getMatCost(super.lastMetal) * super.surfaceArea * this.multiplier);
+			return vIn[0] + (this.getMatCost(this.lastMetal) * this.surfaceArea * this.multiplier);
 		}
 
 }
@@ -499,8 +499,8 @@ class qcBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["QC Time: ", "Cost: "];
 
-		displayInfo[0] = this.appendVal(displayInfo[0], this.timeReq, true);
-		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.timeReq) * QCMINUTE, true);
+		displayInfo[0] = super.appendVal(displayInfo[0], this.timeReq, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.timeReq) * QCMINUTE, true);
 
 		return displayInfo;
 	}
@@ -524,9 +524,9 @@ class totalBrick extends basicBrick{
 		let displayInfo = ["Total: $ ", "Piece: $ ", "Finish Coat: "];
 
 		displayInfo[0] = super.appendVal(displayInfo[0], Math.round(parseFloat(vIn[0])
-			*parseFloat(super.quantity)*1000)/1000, false);
+			*parseFloat(this.quantity)*1000)/1000, false);
 		displayInfo[1] = super.appendVal(displayInfo[1], Math.round(vIn[0]*1000)/1000, false);
-		displayInfo[2] = super.appendVal(displayInfo[2], super.lastMetal, false);
+		displayInfo[2] = super.appendVal(displayInfo[2], this.lastMetal, false);
 
 		return displayInfo;
 	}
@@ -574,8 +574,8 @@ class addBrick extends mathBrick{
 		let nullIn = false;
 		let displayInfo = ["",""];
 
-		if(super.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input1 + " + ");
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " + ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " + ");
 		}else{
@@ -583,8 +583,8 @@ class addBrick extends mathBrick{
 			nullIn = true;
 		}
 
-		if(super.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
@@ -603,8 +603,8 @@ class addBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(super.input1 != null) num1 = super.input1;
-		if(super.input2 != null) num2 = super.input2;
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)+parseInt(num2));
@@ -627,8 +627,8 @@ class subBrick extends mathBrick{
 		let nullIn = false;
 		let displayInfo = ["",""]
 
-		if(super.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input1 + " - ");
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " - ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " - ");
 		}else{
@@ -636,8 +636,8 @@ class subBrick extends mathBrick{
 			nullIn = true;
 		}
 
-		if(super.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
@@ -656,8 +656,8 @@ class subBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(super.input1 != null) num1 = super.input1;
-		if(super.input2 != null) num2 = super.input2;
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)-parseInt(num2));
@@ -679,8 +679,8 @@ class multBrick extends mathBrick{
 	generateString(vIn, out){
 		let nullIn = false;
 		let displayInfo = ["",""]
-		if(super.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input1 + " x ");
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " x ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " x ");
 		}else{
@@ -688,8 +688,8 @@ class multBrick extends mathBrick{
 			nullIn = true;
 		}
 
-		if(super.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
@@ -708,8 +708,8 @@ class multBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(super.input1 != null) num1 = super.input1;
-		if(super.input2 != null) num2 = super.input2;
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)*parseInt(num2));
@@ -732,8 +732,8 @@ class divBrick extends mathBrick{
 		let nullIn = false;
 		let displayInfo = ["",""]
 
-		if(super.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input1 + " / ");
+		if(this.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input1 + " / ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " / ");
 		}else{
@@ -741,8 +741,8 @@ class divBrick extends mathBrick{
 			nullIn = true;
 		}
 
-		if(super.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
+		if(this.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
@@ -761,8 +761,8 @@ class divBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(super.input1 != null) num1 = super.input1;
-		if(super.input2 != null) num2 = super.input2;
+		if(this.input1 != null) num1 = this.input1;
+		if(this.input2 != null) num2 = this.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)/parseInt(num2));
