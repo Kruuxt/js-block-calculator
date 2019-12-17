@@ -8,11 +8,13 @@ const BRICKWIDTH = 200,
 	XSIZE=15,
 	QCMINUTE=120/60,
 	MASKMINUTE=100/60,
+	MATHCOLOR = "#57A773", OPERATIONCOLOR = "#6A8EAE", BASECOLOR = "#9BD1E5", BGCOLOR = "#D1FAFF",
 	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
 	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
 	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN", KOVAR = "Kovar"
 	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL, KOVAR],
 	PLATEMATERIALS = [CADMIUM, EN, GOLD, SILVER, NIBRON, TINLEAD];
+
 
 /**
  * The parent class for all other bricks, the rectangles used in the
@@ -108,6 +110,7 @@ class mathBrick extends basicBrick{
 		this.input1 = null;
 		/**@type {number} Right/Second input */
 		this.input2 = null;
+		super.color = MATHCOLOR;
 	}
 
 	displayFields(div){
@@ -157,7 +160,7 @@ class mathBrick extends basicBrick{
 class baseBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "gray",
+		super.color = BASECOLOR,
 		super.spawnText = "Base Material",
 		super.nodeIn = 0,
 		super.nodeOut = 1;
@@ -224,7 +227,7 @@ class baseBrick extends basicBrick{
 class maskBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "green",
+		super.color = OPERATIONCOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 1,
 		super.spawnText = "Mask/Unmask";
@@ -275,7 +278,7 @@ class maskBrick extends basicBrick{
 class rackBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "green";
+		super.color = OPERATIONCOLOR;
 		super.nodeIn = 1;
 		super.nodeOut = 1;
 		super.spawnText = "Rack/Unrack",
@@ -310,7 +313,7 @@ class rackBrick extends basicBrick{
 class plateBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "blue",
+		super.color = OPERATIONCOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 1,
 		super.spawnText = "Plating Layer";
@@ -471,7 +474,7 @@ class plateBrick extends basicBrick{
 class qcBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "green",
+		super.color = OPERATIONCOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 1,
 		super.spawnText = "Quality Control";
@@ -510,7 +513,7 @@ class qcBrick extends basicBrick{
 class totalBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "orange",
+		super.color = BASECOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 0,
 		super.spawnText = "Total";
@@ -532,7 +535,7 @@ class totalBrick extends basicBrick{
 class splitBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = "orange",
+		super.color = MATHCOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 2,
 		super.spawnText = "Splitter";
@@ -561,7 +564,6 @@ class splitBrick extends basicBrick{
 class addBrick extends mathBrick{
 	constructor() {
 		super();
-		super.color = "yellow",
 		super.nodeIn = 2,
 		super.nodeOut = 1,
 		super.spawnText = "Adder";
@@ -615,7 +617,6 @@ class addBrick extends mathBrick{
 class subBrick extends mathBrick{
 	constructor() {
 		super();
-		super.color = "yellow",
 		super.nodeIn = 2,
 		super.nodeOut = 1,
 		super.spawnText = "Subtracter";
@@ -669,7 +670,6 @@ class subBrick extends mathBrick{
 class multBrick extends mathBrick{
 	constructor() {
 		super();
-		super.color = "yellow",
 		super.nodeIn = 2,
 		super.nodeOut = 1,
 		super.spawnText = "Multiplier";
@@ -722,7 +722,6 @@ class multBrick extends mathBrick{
 class divBrick extends mathBrick{
 	constructor() {
 		super();
-		super.color = "yellow",
 		super.nodeIn = 2,
 		super.nodeOut = 1,
 		super.spawnText = "Divider";
@@ -1137,13 +1136,13 @@ class Node {
 //Create header of spawner bricks.
 let brickArray = [new brick(SELECTORGAP, 5, new baseBrick(), true, 0),
 	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new plateBrick(), true, 1),
-	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new totalBrick(), true, 2),
-	new brick(SELECTORGAP*4 + BRICKWIDTH*3, 5, new maskBrick(), true, 3),
-	new brick(SELECTORGAP*5 + BRICKWIDTH*4, 5, new rackBrick(), true, 4), 
-	new brick(SELECTORGAP*6 + BRICKWIDTH*5, 5, new qcBrick(), true, 5),
-	new brick(SELECTORGAP*1, BRICKHEIGHT + 10, new splitBrick(), true, 6),
-	new brick(SELECTORGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new addBrick(), true, 7),
-	new brick(SELECTORGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new subBrick(), true, 8),
+	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new rackBrick(), true, 2),
+	new brick(SELECTORGAP*4 + BRICKWIDTH*3, 5, new addBrick(), true, 3),
+	new brick(SELECTORGAP*5 + BRICKWIDTH*4, 5, new subBrick(), true, 4), 
+	new brick(SELECTORGAP*6 + BRICKWIDTH*5, 5, new splitBrick(), true, 5),
+	new brick(SELECTORGAP*1, BRICKHEIGHT + 10, new totalBrick(), true, 6),
+	new brick(SELECTORGAP*2 + BRICKWIDTH, BRICKHEIGHT + 10, new maskBrick(), true, 7),
+	new brick(SELECTORGAP*3 + BRICKWIDTH*2, BRICKHEIGHT + 10, new qcBrick(), true, 8),
 	new brick(SELECTORGAP*4 + BRICKWIDTH*3, BRICKHEIGHT + 10, new multBrick(), true, 9),
 	new brick(SELECTORGAP*5 + BRICKWIDTH*4, BRICKHEIGHT + 10, new divBrick(), true, 10)];
 
@@ -1172,6 +1171,9 @@ window.onload = function() {
 	function draw() {
 		let infoOut = document.getElementById("infoOut");
 		context.clearRect(0, 0, width, height);
+
+		context.fillStyle = BGCOLOR;
+		context.fillRect(0, 0, width, height);
 	
 		for(i in brickArray){
 			if(brickArray[i] != null) brickArray[i].drawNodeLines(context);
