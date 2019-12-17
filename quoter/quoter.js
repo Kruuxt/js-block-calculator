@@ -9,6 +9,7 @@ const BRICKWIDTH = 200,
 	QCMINUTE=120/60,
 	MASKMINUTE=100/60,
 	MATHCOLOR = "#57A773", OPERATIONCOLOR = "#6A8EAE", BASECOLOR = "#9BD1E5", BGCOLOR = "#D1FAFF",
+	SPLITCOLOR = "#114B5F", PLATECOLOR = "#157145",
 	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
 	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
 	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN", KOVAR = "Kovar"
@@ -313,7 +314,7 @@ class rackBrick extends basicBrick{
 class plateBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = OPERATIONCOLOR,
+		super.color = PLATECOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 1,
 		super.spawnText = "Plating Layer";
@@ -535,7 +536,7 @@ class totalBrick extends basicBrick{
 class splitBrick extends basicBrick{
 	constructor() {
 		super();
-		super.color = MATHCOLOR,
+		super.color = SPLITCOLOR,
 		super.nodeIn = 1,
 		super.nodeOut = 2,
 		super.spawnText = "Splitter";
