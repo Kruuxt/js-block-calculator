@@ -8,8 +8,8 @@ const BRICKWIDTH = 200,
 	XSIZE=15,
 	QCMINUTE=120/60,
 	MASKMINUTE=100/60,
-	MATHCOLOR = "#57A773", OPERATIONCOLOR = "#6A8EAE", BGCOLOR = "#D1FAFF",
-	SPLITCOLOR = "#1a7391", PLATECOLOR = "#157145", BASECOLOR = "#9BD1E5",
+	MATHCOLOR = "#57a79a", OPERATIONCOLOR = "#6A8EAE", BGCOLOR = "#f0feff",
+	SPLITCOLOR = "#1a7391", PLATECOLOR = "#64699e", BASECOLOR = "#9BD1E5",
 	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
 	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
 	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN", KOVAR = "Kovar"
@@ -97,6 +97,11 @@ class basicBrick{
 		}else{
 			return stringIn.concat("No Value");
 		}
+	}
+
+	/**Quick round to nearest .001 */
+	round(num){
+			return Math.round(parseFloat(num)*1000)/1000;
 	}
 }
 
@@ -265,7 +270,7 @@ class maskBrick extends basicBrick{
 		displayInfo[0] = super.appendVal(displayInfo[0], this.timeReq, true);
 		displayInfo[1] = super.appendVal(displayInfo[1], this.screws, true);
 		displayInfo[2] = super.appendVal(displayInfo[2],
-			parseInt(this.timeReq) * MASKMINUTE + parseInt(this.screws) * .5, true);
+			this.round(parseFloat(this.timeReq) * MASKMINUTE + parseFloat(this.screws) * .5), true);
 		return displayInfo;
 	}
 
@@ -301,7 +306,8 @@ class rackBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["Price per piece: ", "Price for all: "];
 		displayInfo[0] = super.appendVal(displayInfo[0], this.pricePerPiece, true);
-		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.pricePerPiece) * this.quantity, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.round(parseInt(this.pricePerPiece) * this.quantity)
+		, true);
 		return displayInfo;
 	}
 
@@ -413,8 +419,8 @@ class plateBrick extends basicBrick{
 
 		displayInfo[0] = super.appendVal(displayInfo[0], this.plateMat, true);
 		displayInfo[1] = super.appendVal(displayInfo[1], this.depth, true);
-		displayInfo[2] = super.appendVal(displayInfo[2], this.depth * 10000
-			* this.getMatCost(this.lastMetal) * this.surfaceArea, false);
+		displayInfo[2] = super.appendVal(displayInfo[2], this.round(this.depth * 10000
+			* this.getMatCost(this.lastMetal) * this.surfaceArea), false);
 		return displayInfo;
 	}
 
@@ -493,14 +499,14 @@ class qcBrick extends basicBrick{
 	}
 
 	setFields(){
-			this.timeReq = super.getValue(document.getElementById("timeReq"));
+			this.timeReq = this.getValue(document.getElementById("timeReq"));
 	}
 
 	generateString(vIn, out){
 		let displayInfo = ["QC Time: ", "Cost: "];
 
 		displayInfo[0] = super.appendVal(displayInfo[0], this.timeReq, true);
-		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.timeReq) * QCMINUTE, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.round(parseFloat(this.timeReq) * QCMINUTE), true);
 
 		return displayInfo;
 	}
@@ -523,9 +529,9 @@ class totalBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["Total: $ ", "Piece: $ ", "Finish Coat: "];
 
-		displayInfo[0] = super.appendVal(displayInfo[0], Math.round(parseFloat(vIn[0])
-			*parseFloat(this.quantity)*1000)/1000, false);
-		displayInfo[1] = super.appendVal(displayInfo[1], Math.round(vIn[0]*1000)/1000, false);
+		displayInfo[0] = super.appendVal(displayInfo[0], this.round(parseFloat(vIn[0])
+			*parseFloat(this.quantity)), false);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.round(vIn[0]), false);
 		displayInfo[2] = super.appendVal(displayInfo[2], this.lastMetal, false);
 
 		return displayInfo;
@@ -544,10 +550,10 @@ class splitBrick extends basicBrick{
 	generateString(vIn, out){
 		let displayInfo = ["" ,""];
 
-		displayInfo[0] = super.appendVal(displayInfo[0], vIn[0], false);
-		displayInfo[1] = super.appendVal(displayInfo[1], out, false);
+		displayInfo[0] = super.appendVal(displayInfo[0], this.round(vIn[0]), false);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.round(out), false);
 		displayInfo[1] = super.appendVal(displayInfo[1], " | ", false);
-		displayInfo[1] = super.appendVal(displayInfo[1], out, false);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.round(out), false);
 		
 		return displayInfo;
 	}
@@ -575,18 +581,18 @@ class addBrick extends mathBrick{
 		let displayInfo = ["",""];
 
 		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " + ");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input1) + " + ");
 		}else if(vIn[0] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[0] + " + ");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[0]) + " + ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " + ");
 			nullIn = true;
 		}
 
 		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input2) + " =");
 		}else if(vIn[1] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[1]) + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
@@ -595,7 +601,7 @@ class addBrick extends mathBrick{
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
-			displayInfo[1] = out;
+			displayInfo[1] = this.round(out);
 			
 		return displayInfo;
 	}
@@ -628,18 +634,18 @@ class subBrick extends mathBrick{
 		let displayInfo = ["",""]
 
 		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " - ");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input1) + " - ");
 		}else if(vIn[0] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[0] + " - ");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[0]) + " - ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " - ");
 			nullIn = true;
 		}
 
 		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input2) + " =");
 		}else if(vIn[1] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[1]) + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
@@ -648,7 +654,7 @@ class subBrick extends mathBrick{
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
-			displayInfo[1] = out;
+			displayInfo[1] = this.round(out);
 			
 		return displayInfo;
 	}
@@ -680,18 +686,18 @@ class multBrick extends mathBrick{
 		let nullIn = false;
 		let displayInfo = ["",""]
 		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " x ");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input1) + " x ");
 		}else if(vIn[0] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[0] + " x ");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[0]) + " x ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " x ");
 			nullIn = true;
 		}
 
 		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input2) + " =");
 		}else if(vIn[1] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[1]) + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
@@ -700,7 +706,7 @@ class multBrick extends mathBrick{
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
-			displayInfo[1] = out;
+			displayInfo[1] = this.round(out);
 			
 		return displayInfo;
 	}
@@ -733,18 +739,18 @@ class divBrick extends mathBrick{
 		let displayInfo = ["",""]
 
 		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " / ");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input1) + " / ");
 		}else if(vIn[0] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[0] + " / ");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[0]) + " / ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " / ");
 			nullIn = true;
 		}
 
 		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(this.input2) + " =");
 		}else if(vIn[1] != null){
-			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
+			displayInfo[0] = displayInfo[0].concat(this.round(vIn[1]) + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
@@ -753,7 +759,7 @@ class divBrick extends mathBrick{
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
-			displayInfo[1] = out;
+			displayInfo[1] = this.round(out);
 			
 		return displayInfo;
 	}
@@ -1000,15 +1006,18 @@ class Node {
 		this.hidden = false;
 	}
 
+	/**Disables the showing of a node and prevents future connections unless shown. */
 	hide(){
 		this.disconnect();
 		this.hidden = true;
 	}
 
+	/**Shows node after being hidden. */
 	show(){
 		this.hidden = false;
 	}
 
+	/**Returns node hitboxes in the form of 4 coordinates. */
 	hitBox(){
 		if(this.inNode){
 			return{
@@ -1027,6 +1036,7 @@ class Node {
 		}
 	}
 
+	/**Returns the position of the center of a node, used in drawing connection lines. */
 	findCenter(){
 		if(this.inNode){
 			return{
@@ -1041,14 +1051,15 @@ class Node {
 		}
 	}
 
+	/**Terminates any connection between this node and a connected node. */
 	disconnect(){
-		if(this.inNode){
-			this.value = null;
-		}
+		//Sets receiving value to null if node is an input.
+		if(this.inNode) this.value = null;
+
 		if(this.connectedNode != null){
-			if(!this.inNode){
-				this.connectedNode.value = null;
-			}
+			//Sets connected node's value to null.
+			if(!this.inNode) this.connectedNode.value = null;
+
 			this.isConnected = false;
 			this.connectedNode.isConnected = false;
 			this.connectedNode.connectedNode = null;
@@ -1056,20 +1067,64 @@ class Node {
 		}
 	}
 
+	/**Connects two nodes. Handles logic and cases to prevent connections where none should exist. */
+	connect(otherNode){
+		//Only input nodes can run connect.
+		if(this.inNode){
+			//disconnects from any previously connected nodes.
+			this.disconnect();
+
+			if(otherNode.isConnected){
+				otherNode.disconnect();
+
+				/*There is a random error I can no longer recreate reliably that this mumbo jumbo for loop
+				fixed.  I'm gonna leave it here and if I notice any buggyness I'll re-enable it,
+				but I don't know how these nested for loops provide any advantage over just saying
+				othernode.disconnect().
+				~Johnny K. 12/17/19 */
+				/*for(let i in brickArray){
+					for(let j in brickArray[i].nodeArray){
+						if (brickArray[i].nodeArray[j] === otherNode && brickArray[i].nodeArray[j] != this){
+							brickArray[i].nodeArray[j].disconnect();
+						}
+					}
+				}*/
+			}
+
+			//Whole bunch of connecting.
+			this.isConnected = true;
+			this.connectedNode = otherNode;
+			this.connectedNode.isConnected = true;
+			this.connectedNode.connectedNode = this;
+
+			//Set value = to node's output
+			this.value = this.connectedNode.iBrick.out;
+			//Handle generic data.
+			if(this.iBrick.brickType instanceof plateBrick)
+				this.iBrick.brickType.plateMat = this.connectedNode.iBrick.brickType.lastMetal;
+			else
+				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
+			this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
+			this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
+		}else
+			otherNode.connect(this);
+	}
+
+	/**Checks the output of connected nodes and handles updating of generic data. ie surface area. */
 	updateValue(){
 		if(this.inNode){
 			if(this.isConnected){
 				this.value = this.connectedNode.iBrick.out;
-				if(!(this.iBrick.brickType instanceof plateBrick))
+				if(this.iBrick.brickType instanceof plateBrick)
+					this.iBrick.brickType.plateMat = this.connectedNode.iBrick.brickType.lastMetal;
+				else
 					this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
-					else
-					this.iBrick.brickType.under = this.connectedNode.iBrick.brickType.lastMetal;
 				this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
 				this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
 			}else{
 				if(!(this.iBrick.brickType instanceof plateBrick))
 					this.iBrick.brickType.lastMetal = null;
-					else
+				else
 					this.iBrick.brickType.under = null;
 				this.iBrick.brickType.surfaceArea = null;
 				this.iBrick.brickType.quantity = null;
@@ -1077,34 +1132,7 @@ class Node {
 		}
 	}
 
-	connect(otherNode){
-		if(this.inNode){
-			this.disconnect();
-			if(otherNode.isConnected){
-				for(let i in brickArray){
-					for(let j in brickArray[i].nodeArray){
-						if (brickArray[i].nodeArray[j] === otherNode && brickArray[i].nodeArray[j] != this){
-							brickArray[i].nodeArray[j].disconnect(true);
-						}
-					}
-				}
-			}
-			this.isConnected = true;
-			this.connectedNode = otherNode;
-			this.connectedNode.isConnected = true;
-			this.connectedNode.connectedNode = this;
-			this.value = this.connectedNode.iBrick.out;
-			if(!(this.iBrick.brickType instanceof plateBrick))
-				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
-				else
-				this.iBrick.brickType.under = this.connectedNode.iBrick.brickType.lastMetal;
-			this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
-			this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
-		}else{
-			otherNode.connect(this);
-		}
-	}
-
+	/**Updates position of node. */
 	update(){
 			this.posX += this.iBrick.posX-this.startX;
 			this.startX = this.iBrick.posX;
@@ -1112,6 +1140,7 @@ class Node {
 			this.startY = this.iBrick.posY;
 	}
 
+	/**checks if parameters (x,y) fall within the node's hitbox. */
 	checkClick(x, y){
 		if(this.hidden) return false;
 		if(this.hitBox().x1 < x && this.hitBox().x2 > x
@@ -1123,13 +1152,15 @@ class Node {
 		}
 	}
 
+	/**Displays node. */
 	draw(context){
 		if(!this.hidden){
-			context.lineWidth = 2;
-			context.fillStyle = this.iBrick.brickType.color;
-			context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
-			context.fillStyle = "black";
-			context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT);
+			context.fillStyle = this.iBrick.brickType.color; //Set color to bricktype color.
+			context.fillRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT); //Draw Node.
+
+			context.lineWidth = 2; //Set border width.
+			context.fillStyle = "black"; //Set border color.
+			context.strokeRect(this.posX, this.posY, NODEWIDTH, NODEHEIGHT); //Draw border.
 		}
 	}
 }
