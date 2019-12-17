@@ -10,35 +10,68 @@ const BRICKWIDTH = 200,
 	MASKMINUTE=100/60,
 	COPPER = "Copper", STEEL = "Steel",	SS = "Stainless", ALUMINUM = "Aluminum",
 	NICKEL= "Nickel", GOLD = "Gold", SILVER = "Silver",	NIBRON = "Nibron",
-	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN",
-	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL],
+	TINLEAD = "Tin Lead", CADMIUM = "Cadmium", EN = "EN", KOVAR = "Kovar"
+	BASEMATERIALS = [COPPER, NICKEL, STEEL, SS, ALUMINUM, NICKEL, KOVAR],
 	PLATEMATERIALS = [CADMIUM, EN, GOLD, SILVER, NIBRON, TINLEAD];
 
+/**
+ * The parent class for all other bricks, the rectangles used in the
+ * calculator to build quotes. Contains empty instances of all
+ * generic brick methods, some useful generic tools, and generic variable
+ * declarations.
+ */
 class basicBrick{
 	constructor(){
-		this.color = "white",
-		this.nodeIn = 0,
-		this.nodeOut = 0,
-		this.spawnText = "Undefined Brick",
-		this.lastMetal = null,
-		this.surfaceArea = null,
-		this.iBrick = null,
+		/**@type {String} The color of the brick.*/
+		this.color = "white";
+		/**@type {number} The number of input nodes.*/
+		this.nodeIn = 0;
+		/**@type {number} The number of output nodes.*/
+		this.nodeOut = 0;
+		/**@type {String} Default string displayed if brick is a spawner.*/
+		this.spawnText = "Undefined Brick";
+		/**@type {String} The current exposed metal.*/
+		this.lastMetal = null;
+		/**@type {number} Surface area of the part to be plated.*/
+		this.surfaceArea = null;
+		/**@type {brick} The brick that was assigned this brickType.*/
+		this.iBrick = null;
+		/**@type {number} The number of parts in the order.*/
 		this.quantity = null;
 	}
+
+	/**
+	 * Method to create and show the text boxes for users to input variables.
+	 * @param {Element} div The div in which to display brick specific text boxes.
+	 */
 	displayFields(div){}
 
+	/**
+	 * Method to set variables equal to their relative text box.
+	 */
 	setFields(){}
 
-	generateString(vIn, out){ return null }
-
-	calculate(vIn){ return null }
+	/**
+	 * Method to calculate the output of the brick given its inputs.
+	 * @param {number[]} vIn The array of inputs received by the in nodes.
+	 */
+	calculate(vIn){ return 0 }
 	
+	/**
+	 * Gives a copy of the parent brick to its assigned bricktype for node manipulation,
+	 * specifically on math bricks.
+	 * 
+	 * @param {brick} iBrick The parent brick that is assigned this brickType
+	 */
 	initialize(iBrick){
-		console.log("Initializing iBrick from " + this.iBrick);
 		this.iBrick = iBrick;
-		console.log("to" + this.iBrick);
 	}
 
+	/**
+	 * A simple tool to return an element's value, or null if the text box was left empty.
+	 * 
+	 * @param {Element} element The element to return the value of.
+	 */
 	getValue(element){
 		if(element.value != "")
 			return element.value;
@@ -46,6 +79,13 @@ class basicBrick{
 			return null;
 	}
 	
+	/**
+	 * A tool to quickly append a string.
+	 * 
+	 * @param {String} stringIn String to be appended.
+	 * @param {String} value String to be added.
+	 * @param {Boolean} undef if value is null, True: return "undefined" False: return "No Value"
+	 */
 	appendVal(stringIn, value, undef){
 		if(value != null){
 			return stringIn.concat(value);
@@ -57,31 +97,43 @@ class basicBrick{
 	}
 }
 
+/**
+ * Parent for math bricks. Defaults displayFields to two inputs.
+ * Contains logic for hiding and showing nodes based on inputs.
+ */
 class mathBrick extends basicBrick{
 	constructor(){
 		super();
-		this.input1 = null,
+		/**@type {number} Left/First input */
+		this.input1 = null;
+		/**@type {number} Right/Second input */
 		this.input2 = null;
 	}
 
 	displayFields(div){
+		//Create input text boxes.
 		let in1Field = document.createElement("input");
 		let in2Field = document.createElement("input");
 
+		//Set HTML5 id attributes for textboxes.
 		in1Field.id = "in1Field";
 		in2Field.id = "in2Field";
 
+		//Set default value in the textbox to any previous user input.
 		in1Field.value = this.input1;
 		in2Field.value = this.input2;
 
+		//Sets grayed out text when no value in textboxes.
 		in1Field.placeholder = "Value 1";
 		in2Field.placeholder = "Value 2";
 
+		//Add textboxes to inputs div.
 		div.appendChild(in1Field);
 		div.appendChild(in2Field);
 	}
 
 	setFields(){
+		//Hides input nodes if user inputs a value into a textbox.
 		if(document.getElementById("in1Field").value != "")
 			this.iBrick.nodeArray[0].hide();
 		else 
@@ -92,46 +144,56 @@ class mathBrick extends basicBrick{
 		else 
 			this.iBrick.nodeArray[1].show();
 
+		//sets input variables equal to user input.
 		this.input1 = this.getValue(document.getElementById("in1Field"));
 		this.input2 = this.getValue(document.getElementById("in2Field"));
 	}
 }
 
+/**
+ * Brick to represent original part.  Requires user to set a material,
+ * surface area and quantity to be useful.
+ */
 class baseBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "gray",
-		this.spawnText = "Base Material",
-		this.baseMaterial = null,
-		this.nodeIn = 0,
-		this.nodeOut = 1;
+		super.color = "gray",
+		super.spawnText = "Base Material",
+		super.nodeIn = 0,
+		super.nodeOut = 1;
 	}
 
 	displayFields(div){
+		// Create input elements for base material, surface area and quantity.
 		let bmSelector = document.createElement("select"),
-			optionList = this.getOptions(),
 			surfaceArea = document.createElement("input"),
 			quantity = document.createElement("input");
 
-		for(let i in optionList)
-			bmSelector.add(optionList[i]);
+		//Add an option for each base material to the base material selector.
+		for(let i in this.getOptions())
+			bmSelector.add(this.getOptions()[i]);
 
-		bmSelector.value = this.lastMetal;
-		surfaceArea.value = this.surfaceArea;
-		quantity.value = this.quantity;
+		//Set value to any previous user inputs.
+		bmSelector.value = super.lastMetal;
+		surfaceArea.value = super.surfaceArea;
+		quantity.value = super.quantity;
 
+		//Add grayed text to textboxes when empty.
 		surfaceArea.placeholder = "Surface Area";
 		quantity.placeholder = "Quantity";
 
+		//Set HTML5 ID attribute for each user input field. 
 		bmSelector.id = "bmSelector";
 		surfaceArea.id = "surfaceArea";
 		quantity.id = "Quantity";
 
+		//Add input fields to input div.
 		div.appendChild(bmSelector);
 		div.appendChild(surfaceArea);
 		div.appendChild(quantity);
 	}
 
+	/**@returns {Element[]} an array of option elements, one for each base material */
 	getOptions(){
 		let optionList = [];
 		for(let i in BASEMATERIALS){
@@ -143,131 +205,159 @@ class baseBrick extends basicBrick{
 	}
 
 	setFields(){
-		this.baseMaterial = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
-		this.lastMetal = this.baseMaterial;
-		this.surfaceArea = this.getValue(document.getElementById("surfaceArea"));
-		this.quantity = this.getValue(document.getElementById("Quantity"));
+		super.lastMetal = BASEMATERIALS[document.getElementById("bmSelector").selectedIndex];
+		super.surfaceArea = super.getValue(document.getElementById("surfaceArea"));
+		super.quantity = super.getValue(document.getElementById("Quantity"));
 	}
 
 	generateString(vIn, out){
 		let displayInfo = ["Base Material: ", "Surface Area: ", "Quantity: "];
 
-		displayInfo[0] = this.appendVal(displayInfo[0], this.baseMaterial, true);
-		displayInfo[1] = this.appendVal(displayInfo[1], this.surfaceArea, true);
-		displayInfo[2] = this.appendVal(displayInfo[2], this.quantity, true);
+		displayInfo[0] = super.appendVal(displayInfo[0], super.lastMetal, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], super.surfaceArea, true);
+		displayInfo[2] = super.appendVal(displayInfo[2], super.quantity, true);
 		return displayInfo;
-	}
-
-	calculate(vIn){
-		return 0;
 	}
 }
 
+/** Brick to calculate cost of masking*/
 class maskBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "green",
-		this.nodeIn = 1,
-		this.nodeOut = 1,
-		this.spawnText = "Mask/Unmask",
+		super.color = "green",
+		super.nodeIn = 1,
+		super.nodeOut = 1,
+		super.spawnText = "Mask/Unmask";
+		/**@type {number} Time required to complete a single piece. */
 		this.timeReq = null;
+		/**@type {number} Screws required to mask threads on part. */
+		this.screws = null;
 	}
 
 	displayFields(div){
-		let timeReqIn = document.createElement("input");
+		let timeReqIn = document.createElement("input"),
+			screwsIn = document.createElement("input");
+
 		timeReqIn.value = this.timeReq;
+		screwsIn.value = this.screws;
+
 		timeReqIn.placeholder = "Masking Time Required";
+		screwsIn.placeholder = "Amount of screws needed";
+
 		timeReqIn.id = "timeReq";
+		screwsIn.id = "screws"
+
 		div.appendChild(timeReqIn);
+		div.appendChild(screwsIn);
 	}
 
 	setFields(){
-		this.timeReq = this.getValue(document.getElementById("timeReq"));
+		this.timeReq = super.getValue(document.getElementById("timeReq"));
+		this.screws = super.getValue(document.getElementById("screws"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = ["Mask Time: ", "Total Cost: "];
-		displayInfo[0] = this.appendVal(displayInfo[0], this.timeReq, true);
-		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.timeReq) * MASKMINUTE, true);
+		let displayInfo = ["Mask Time: ", "Screw Count: ", "Total Cost: "];
+		displayInfo[0] = super.appendVal(displayInfo[0], this.timeReq, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.screws, true);
+		displayInfo[2] = super.appendVal(displayInfo[2],
+			parseInt(this.timeReq) * MASKMINUTE + parseInt(this.screws) * .5, true);
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		return (vIn[0] + (this.timeReq * MASKMINUTE));
+		//Time required to mask a single piece * cost of masking per minute + $.5 per screw.
+		return (vIn[0] + (this.timeReq * MASKMINUTE + this.screws * .5));
 	}
 }
 
+/**Brick to calculate cost of racking */
 class rackBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "green";
-		this.nodeIn = 1;
-		this.nodeOut = 1;
-		this.spawnText = "Rack/Unrack",
-		this.features = null;
+		super.color = "green";
+		super.nodeIn = 1;
+		super.nodeOut = 1;
+		super.spawnText = "Rack/Unrack",
+		this.pricePerPiece = null;
 	}
 
 	displayFields(div){
-		let featuresIn = document.createElement("input");
-		featuresIn.value = this.features;
-		featuresIn.placeholder = "Racking Time Required";
-		featuresIn.id = "features";
-		div.appendChild(featuresIn);
+		let priceIn = document.createElement("input");
+		priceIn.value = this.pricePerPiece;
+		priceIn.placeholder = "Price per piece";
+		priceIn.id = "price";
+		div.appendChild(priceIn);
 	}
 
 	setFields(){
-		this.features = this.getValue(document.getElementById("features"));
+		this.pricePerPiece = super.getValue(document.getElementById("price"));
 	}
 
 	generateString(vIn, out){
-		let displayInfo = ["Rack Features: ", "Total Cost: "];
-		displayInfo[0] = this.appendVal(displayInfo[0], this.features, true);
-		displayInfo[1] = this.appendVal(displayInfo[1], parseInt(this.features) * .5 + .5, true);
+		let displayInfo = ["Price per piece: ", "Price for all: "];
+		displayInfo[0] = super.appendVal(displayInfo[0], this.pricePerPiece, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], parseInt(this.pricePerPiece) * super.quantity, true);
 		return displayInfo;
 	}
 
 	calculate(vIn){
-		return vIn[0] + this.features*.5 + .5;
+		return vIn[0] + this.pricePerPiece;
 	}
 }
 
+/**Brick to calculate cost of plating */
 class plateBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "blue",
-		this.nodeIn = 1,
-		this.nodeOut = 1,
-		this.spawnText = "Plating Layer",
-		this.plateMat = null,
-		this.depth = null,
-		this.multiplier = 1.8;
+		super.color = "blue",
+		super.nodeIn = 1,
+		super.nodeOut = 1,
+		super.spawnText = "Plating Layer";
+
+		/**Material to be plated onto part. */
+		this.plateMat = null;
+		/**Depth of plating. */
+		this.depth = null;
+		/**Number to multiply cost by for profit. */
+		this.multiplier = 1;
+		/**Default multiplier based on plateMat and lastMetal */
+		this.defaultMult = 1;
+		/**Stores lastMetal */
+		this.under = null;
 	}
 
-		displayFields(div){
-		let plateSelector = document.createElement("select"),
-			optionList = this.getOptions(),
+	displayFields(div){
+		let defaultMultTag = document.createElement("label"),
+			multiplier = document.createElement("input"),
 			plateDepth = document.createElement("input"),
-			multiplier = document.createElement("input");
+			plateSelector = document.createElement("select");
 
-		for(let i in optionList)
-			plateSelector.add(optionList[i]);
+		//Get array of option elements, one for each plate metal.
+		for(let i in this.getOptions())
+			plateSelector.add(this.getOptions()[i]);
 
-		plateSelector.value = this.lastMetal;
-		plateDepth.value = this.depth;
+		defaultMultTag.innerHTML = "Suggested Multiplier: "
+		+ this.getDefaultMult(this.under, this.plateMat);
 		multiplier.value = this.multiplier;
+		plateDepth.value = this.depth;
+		plateSelector.value = this.lastMetal;
 
-		plateDepth.placeholder = "Plating Thickness";
 		multiplier.placeholder = "Profit Multiplier";
+		plateDepth.placeholder = "Plating Thickness";
 
+		defaultMultTag.id = "defaultMult";
 		multiplier.id = "multiplier";
-		plateSelector.id = "plateSelector";
 		plateDepth.id = "plateDepth";
+		plateSelector.id = "plateSelector";
 
 		div.appendChild(plateSelector);
 		div.appendChild(plateDepth);
 		div.appendChild(multiplier);
+		div.appendChild(defaultMultTag);
 	}
 
+	/**@returns {Element[]} an array of option elements, one for each plate material */
 	getOptions(){
 		let optionList = [];
 		for(let i in PLATEMATERIALS){
@@ -280,19 +370,71 @@ class plateBrick extends basicBrick{
 
 	setFields(){
 		this.plateMat = PLATEMATERIALS[document.getElementById("plateSelector").selectedIndex];
-		this.lastMetal = this.plateMat;
-		this.depth = this.getValue(document.getElementById("plateDepth"));
-		this.multiplier = this.getValue(document.getElementById("multiplier"));
+		this.under = super.lastMetal;
+		super.lastMetal = this.plateMat;
+		this.depth = super.getValue(document.getElementById("plateDepth"));
+		this.multiplier = super.getValue(document.getElementById("multiplier"));
+	}
+
+	/**Updates the default multiplier suggestion text to match current selected metals. */
+	updateMultField(){
+		/**@type {Element} The div for information and suggestions. */
+		let divOut = document.getElementById("infoOut");
+		/**@type {Element} Label that shows the current price per inch of the materials selected. */
+		let pricePerIn = document.createElement("label");
+		
+		//Updates the info in the info out div, displaying cost per in².
+		pricePerIn.id = "cost";
+		pricePerIn.innerHTML = "Pricing at " + this.getMatCost(this.plateMat)
+		+ " per in².";
+		divOut.appendChild(pricePerIn);
+
+		//Updates suggestion based on metals used.
+		if(this.under === "Aluminum" && this.plateMat === "Gold")
+			document.getElementById("defaultMult").innerHTML = 
+				"Suggested Multiplier: 2.5. Don't charge for basic racking. Calculate plating +.00002";
+
+		else if(this.plateMat === "Gold")
+			document.getElementById("defaultMult").innerHTML = 
+				"Suggested Multiplier: " + this.getDefaultMult(this.under, this.plateMat)
+				+ ". Calculate plating +.00002";
+
+		else
+			document.getElementById("defaultMult").innerHTML = "Suggested Multiplier: "
+				+ this.getDefaultMult(this.under, this.plateMat);
 	}
 
 	generateString(vIn, out){
 		let displayInfo = ["Plate Mat.: ", "Depth: ", "Mat. Cost: $"];
-		displayInfo[0] = this.appendVal(displayInfo[0], this.plateMat, true);
-		displayInfo[1] = this.appendVal(displayInfo[1], this.depth, true);
-		displayInfo[2] = this.appendVal(displayInfo[2], this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea, false);
+
+		displayInfo[0] = super.appendVal(displayInfo[0], this.plateMat, true);
+		displayInfo[1] = super.appendVal(displayInfo[1], this.depth, true);
+		displayInfo[2] = super.appendVal(displayInfo[2], this.depth * 10000
+			* this.getMatCost(super.lastMetal) * super.surfaceArea, false);
 		return displayInfo;
 	}
 
+	/**
+	 * Suggests a profit multiplier based on metal interactions.
+	 * 
+	 * @param {String} under Material under current plating
+	 * @param {String} over Material to be plated
+	 */
+	getDefaultMult(under, over){
+		if(under === "Aluminum" && over === "Gold")
+			return 2.5;
+		if(under === "Kovar" && over === "Gold")
+			return 2.5;
+		if(over === "gold")
+			return 1.8;
+		return 1;
+	}
+
+	/**
+	 * Get the price per in² based on metal interactions.
+	 * 
+	 * @param {String} material Material to be plated
+	 */
 	getMatCost(material){
 		switch(material){
 			case "Cadmium":
@@ -305,32 +447,41 @@ class plateBrick extends basicBrick{
 				return 0.012;
 			case "Nibron":
 				return 0;
-			case "Tin Lead":
+			case "Tin Lead":{
+				if(this.under === "Aluminum")
+					return .21;
 				return .19;
+			}
 			default:
 				return 0;
 		}
 	}
 
 	calculate(vIn){
-		console.log("Depth: " + this.depth + ". Mult: " + 10000 + ". Mat Cost: " + this.getMatCost(this.lastMetal) + ". Surface Area: " + this.surfaceArea);
-		return vIn[0] + (this.depth * 10000 * this.getMatCost(this.lastMetal) * this.surfaceArea * this.multiplier);
-	}
+		if(this.plateMat != "Tin Lead")
+			return vIn[0] + (this.depth * 10000 * this.getMatCost(super.lastMetal)
+				* super.surfaceArea * this.multiplier);
+		else
+			return vIn[0] + (this.getMatCost(super.lastMetal) * super.surfaceArea * this.multiplier);
+		}
 
 }
 
+/**Brick to determine cost of QC time allotted to the part. */
 class qcBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "green",
-		this.nodeIn = 1,
-		this.nodeOut = 1,
-		this.spawnText = "Quality Control",
+		super.color = "green",
+		super.nodeIn = 1,
+		super.nodeOut = 1,
+		super.spawnText = "Quality Control";
+		/**@type {number} QC time required */
 		this.timeReq = null;
 	}
 
 	displayFields(div){
 		let timeReqIn = document.createElement("input");
+
 		timeReqIn.value = this.timeReq;
 		timeReqIn.placeholder = "QC Time Required";
 		timeReqIn.id = "timeReq";
@@ -338,7 +489,7 @@ class qcBrick extends basicBrick{
 	}
 
 	setFields(){
-			this.timeReq = this.getValue(document.getElementById("timeReq"));
+			this.timeReq = super.getValue(document.getElementById("timeReq"));
 	}
 
 	generateString(vIn, out){
@@ -355,39 +506,44 @@ class qcBrick extends basicBrick{
 	}
 }
 
+/** Final brick in the chain, displays cost information. */
 class totalBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "orange",
-		this.nodeIn = 1,
-		this.nodeOut = 0,
-		this.spawnText = "Total";
+		super.color = "orange",
+		super.nodeIn = 1,
+		super.nodeOut = 0,
+		super.spawnText = "Total";
 	}
 
 	generateString(vIn, out){
 		let displayInfo = ["Total: $ ", "Piece: $ ", "Finish Coat: "];
-		displayInfo[0] = this.appendVal(displayInfo[0], Math.round(parseFloat(vIn[0])*parseFloat(this.quantity)*1000)/1000, false);
-		displayInfo[1] = this.appendVal(displayInfo[1], Math.round(vIn[0]*1000)/1000, false);
-		displayInfo[2] = this.appendVal(displayInfo[2], this.lastMetal, false);
+
+		displayInfo[0] = super.appendVal(displayInfo[0], Math.round(parseFloat(vIn[0])
+			*parseFloat(super.quantity)*1000)/1000, false);
+		displayInfo[1] = super.appendVal(displayInfo[1], Math.round(vIn[0]*1000)/1000, false);
+		displayInfo[2] = super.appendVal(displayInfo[2], super.lastMetal, false);
 
 		return displayInfo;
 	}
 }
 
+/**Brick to split all aspects of input node into two output nodes. */
 class splitBrick extends basicBrick{
 	constructor() {
 		super();
-		this.color = "orange",
-		this.nodeIn = 1,
-		this.nodeOut = 2,
-		this.spawnText = "Splitter";
+		super.color = "orange",
+		super.nodeIn = 1,
+		super.nodeOut = 2,
+		super.spawnText = "Splitter";
 	}
 	generateString(vIn, out){
 		let displayInfo = ["" ,""];
-		displayInfo[0] = this.appendVal(displayInfo[0], vIn[0], false);
-		displayInfo[1] = this.appendVal(displayInfo[1], out, false);
-		displayInfo[1] = this.appendVal(displayInfo[1], " | ", false);
-		displayInfo[1] = this.appendVal(displayInfo[1], out, false);
+
+		displayInfo[0] = super.appendVal(displayInfo[0], vIn[0], false);
+		displayInfo[1] = super.appendVal(displayInfo[1], out, false);
+		displayInfo[1] = super.appendVal(displayInfo[1], " | ", false);
+		displayInfo[1] = super.appendVal(displayInfo[1], out, false);
 		
 		return displayInfo;
 	}
@@ -401,34 +557,38 @@ class splitBrick extends basicBrick{
 	}
 }
 
+/**Brick that adds two values */
 class addBrick extends mathBrick{
 	constructor() {
 		super();
-		this.color = "yellow",
-		this.nodeIn = 2,
-		this.nodeOut = 1,
-		this.spawnText = "Adder";
+		super.color = "yellow",
+		super.nodeIn = 2,
+		super.nodeOut = 1,
+		super.spawnText = "Adder";
 	}
 
 	generateString(vIn, out){
 		let nullIn = false;
-		let displayInfo = ["",""]
-		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " + ");
+		let displayInfo = ["",""];
+
+		if(super.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input1 + " + ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " + ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " + ");
 			nullIn = true;
 		}
-		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+
+		if(super.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
 		}
+
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -440,8 +600,8 @@ class addBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(this.input1 != null) num1 = this.input1;
-		if(this.input2 != null) num2 = this.input2;
+		if(super.input1 != null) num1 = super.input1;
+		if(super.input2 != null) num2 = super.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)+parseInt(num2));
@@ -451,34 +611,38 @@ class addBrick extends mathBrick{
 	}
 }
 
+/**Brick that subtracts two values */
 class subBrick extends mathBrick{
 	constructor() {
 		super();
-		this.color = "yellow",
-		this.nodeIn = 2,
-		this.nodeOut = 1,
-		this.spawnText = "Subtracter";
+		super.color = "yellow",
+		super.nodeIn = 2,
+		super.nodeOut = 1,
+		super.spawnText = "Subtracter";
 	}
 
 	generateString(vIn, out){
 		let nullIn = false;
 		let displayInfo = ["",""]
-		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " - ");
+
+		if(super.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input1 + " - ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " - ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " - ");
 			nullIn = true;
 		}
-		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+
+		if(super.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
 		}
+
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -490,8 +654,8 @@ class subBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(this.input1 != null) num1 = this.input1;
-		if(this.input2 != null) num2 = this.input2;
+		if(super.input1 != null) num1 = super.input1;
+		if(super.input2 != null) num2 = super.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)-parseInt(num2));
@@ -501,34 +665,37 @@ class subBrick extends mathBrick{
 	}
 }
 
+/**Brick that multiplies two values */
 class multBrick extends mathBrick{
 	constructor() {
 		super();
-		this.color = "yellow",
-		this.nodeIn = 2,
-		this.nodeOut = 1,
-		this.spawnText = "Multiplier";
+		super.color = "yellow",
+		super.nodeIn = 2,
+		super.nodeOut = 1,
+		super.spawnText = "Multiplier";
 	}
 
 	generateString(vIn, out){
 		let nullIn = false;
 		let displayInfo = ["",""]
-		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " x ");
+		if(super.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input1 + " x ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " x ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " x ");
 			nullIn = true;
 		}
-		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+
+		if(super.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
 		}
+
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -540,8 +707,8 @@ class multBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(this.input1 != null) num1 = this.input1;
-		if(this.input2 != null) num2 = this.input2;
+		if(super.input1 != null) num1 = super.input1;
+		if(super.input2 != null) num2 = super.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)*parseInt(num2));
@@ -551,34 +718,38 @@ class multBrick extends mathBrick{
 	}
 }
 
+/**Brick that divides two values */
 class divBrick extends mathBrick{
 	constructor() {
 		super();
-		this.color = "yellow",
-		this.nodeIn = 2,
-		this.nodeOut = 1,
-		this.spawnText = "Divider";
+		super.color = "yellow",
+		super.nodeIn = 2,
+		super.nodeOut = 1,
+		super.spawnText = "Divider";
 	}
 
 	generateString(vIn, out){
 		let nullIn = false;
 		let displayInfo = ["",""]
-		if(this.input1 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input1 + " / ");
+
+		if(super.input1 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input1 + " / ");
 		}else if(vIn[0] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[0] + " / ");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input" + " / ");
 			nullIn = true;
 		}
-		if(this.input2 != null){
-			displayInfo[0] = displayInfo[0].concat(this.input2 + " =");
+
+		if(super.input2 != null){
+			displayInfo[0] = displayInfo[0].concat(super.input2 + " =");
 		}else if(vIn[1] != null){
 			displayInfo[0] = displayInfo[0].concat(vIn[1] + " =");
 		}else{
 			displayInfo[0] = displayInfo[0].concat("No Input =");
 			nullIn = true;
 		}
+
 		if(nullIn)
 			displayInfo[1] = "Input Empty";
 		else
@@ -590,8 +761,8 @@ class divBrick extends mathBrick{
 	calculate(vIn){
 		let num1 = vIn[0],
 			num2 = vIn[1];
-		if(this.input1 != null) num1 = this.input1;
-		if(this.input2 != null) num2 = this.input2;
+		if(super.input1 != null) num1 = super.input1;
+		if(super.input2 != null) num2 = super.input2;
 
 		if(num1 != null && num2 != null){
 			return (parseInt(num1)/parseInt(num2));
@@ -601,22 +772,36 @@ class divBrick extends mathBrick{
 	}
 }
 
+/**Brick object, handles positioning and contains all parts of the brick. */
 class brick {
+	/**
+	 * @param {number} posX 
+	 * @param {number} posY 
+	 * @param {basicBrick} brickType 
+	 * @param {boolean} spawner True: Brick serves no purpose but to spawn a brick when clicked.
+	 * @param {number} id 
+	 */
 	constructor(posX, posY, brickType, spawner, id) {
-		this.posX = posX,
-		this.posY = posY,
-		this.brickType = brickType,
-		this.spawner = spawner,
-		this.nodeArray = [],
-		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY),
-		this.vIn = [],
-		this.out = [],
+		/**@type {number} X Coordinate on screen */
+		this.posX = posX ;
+		/**@type {number} Y Coordinate on screen */
+		this.posY = posY;
+		/**@type {basicBrick} Defines job of brick */
+		this.brickType = brickType;
+		/**@type {boolean} True: Brick serves no purpose but to spawn a brick when clicked. */
+		this.spawner = spawner;
+		/**@type {Node[]} Array of all nodes for brick */
+		this.nodeArray = [];
+		/**@type {xBox} The box that, when clicked, deletes the brick */
+		this.xBox = new xBox(this, this.posX + BRICKWIDTH - XSIZE, this.posY, this.posX, this.posY);
+		/**@type {number[]} Values of input nodes */
+		this.vIn = [];
+		/**@type {number[]} Values of output nodes */
+		this.out = [];
+		/**@type {number} id of brick */
 		this.id = id;
-		this.initializeNodes();
-	}
 
-	initializeNodes(){
-		//Input nodes
+		//Create and display all input nodes
 		if(this.brickType.nodeIn > 0){
 			let iNSpacing = BRICKWIDTH / (this.brickType.nodeIn + 1);
 			for(let counter = 0; counter < this.brickType.nodeIn; counter++){
@@ -625,7 +810,7 @@ class brick {
 					 this.posY - (NODEHEIGHT/2), this.posX, this.posY, counter);
 			}
 		}
-		//Output nodes
+		//Create and display all output nodes
 		if(this.brickType.nodeOut > 0){
 			let oNSpacing = BRICKWIDTH / (this.brickType.nodeOut + 1);
 			for(let counter = 0; counter < this.brickType.nodeOut; counter++){
@@ -636,17 +821,20 @@ class brick {
 		}
 	}
 
+	/**Draws all nodes in brick's node array */
 	drawNodes(context){
 		for(let i = 0; i < this.nodeArray.length; i++)
 			this.nodeArray[i].draw(context);
 	}
 
+	/**Updates all nodes in node array */
 	updateBrick(){
 		for(i in this.nodeArray)
 			this.nodeArray[i].update();
 		this.xBox.update();
 	}
 
+	/**Checks if (x,y) coordinate falls within brick. */
 	checkClick(x, y){
 		if(this.posX < x && this.posX + BRICKWIDTH > x && this.posY < y && this.posY + BRICKHEIGHT > y){
 			return true;
@@ -655,6 +843,7 @@ class brick {
 		}
 	}
 
+	/**Moves brick to specified location, prevents brick from leaving canvas. */
 	moveBrick(x, y, rect){
 		if(x < rect.left){
 			this.posX = rect.left;
@@ -673,16 +862,21 @@ class brick {
 		}
 	}
 
+	/**Draw brick and fill in brick text. */
 	draw(context){
-		context.lineWidth = 2;
-		context.fillStyle = this.brickType.color;
-		context.fillRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
-		context.fillStyle = "black";
-		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT);
-		context.fillStyle = "black";
-		context.font = "15px Arial";
-		this.updateNodeValues();
-		this.updateNodeValues();
+		context.fillStyle = this.brickType.color; //Sets color of brick.
+		context.fillRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT); //Draws brick.
+
+		context.lineWidth = 2; //Width of border.
+		context.fillStyle = "black"; //Sets color of border.
+		context.strokeRect(this.posX, this.posY, BRICKWIDTH,  BRICKHEIGHT); //Draws border.
+
+		context.fillStyle = "black"; //Color of text.
+		context.font = "15px Arial"; //Size of text.
+		this.updateNodeValues(); //Checks that node values are up to date.
+		this.updateNodeValues(); //Double checks.
+		
+		//Writes to brick, depends on if spawner or not.
 		if(!this.spawner){
 			let lineSpacing = BRICKHEIGHT / this.brickType.generateString(this.vIn, this.out).length;
 			for(i = 0; i < this.brickType.generateString(this.vIn, this.out).length; i++){
@@ -695,6 +889,7 @@ class brick {
 		}
 	}
 
+	/**Updates node values. */
 	updateNodeValues(){
 		for(let j in this.nodeArray){
 			this.nodeArray[j].updateValue();
@@ -706,27 +901,38 @@ class brick {
 			this.out = this.brickType.calculate(this.vIn);
 	}
 
+	/**Disconnects all nodes on brick. */
 	suicide(){
 		for(let i in this.nodeArray){
 			this.nodeArray[i].disconnect();
 		}
 	}
 
+	/**Draws lines between connected nodes. */
 	drawNodeLines(context){
-		context.lineWidth = 2;
+		context.lineWidth = 2; //Width of line.
 		for(let i in this.nodeArray){
 			let iNode = this.nodeArray[i];
 			if(iNode.connectedNode != null && iNode.connectedNode != undefined && iNode.inNode){
-				context.beginPath();
-				context.moveTo(iNode.findCenter().x, iNode.findCenter().y);
-				context.lineTo(iNode.connectedNode.findCenter().x, iNode.connectedNode.findCenter().y);
-				context.stroke();
+				context.beginPath(); //Start to draw a line.
+				context.moveTo(iNode.findCenter().x, iNode.findCenter().y); //Beginning.
+				context.lineTo(iNode.connectedNode.findCenter().x,
+					iNode.connectedNode.findCenter().y); //End.
+				context.stroke(); //Draw.
 			}
 		}
 	}
 }
 
+/**The red x in the corner of a brick. */
 class xBox {
+	/**
+	 * @param {brick} iBrick 
+	 * @param {number} posX 
+	 * @param {number} posY 
+	 * @param {number} startX 
+	 * @param {number} startY 
+	 */
 	constructor(iBrick, posX, posY, startX, startY){
 		this.iBrick = iBrick,
 		this.posX = posX,
@@ -735,18 +941,22 @@ class xBox {
 		this.startY = startY;
 	}
 
+	/**Draw the xBox. */
 	draw(context){
 		if(!iBrick.spawner){
-			context.lineWidth = 2;
-			context.fillStyle = "red";
-			context.fillRect(this.posX, this.posY, XSIZE, XSIZE);
-			context.fillStyle = "black";
-			context.strokeRect(this.posX, this.posY, XSIZE, XSIZE);
-			context.font = "20px Arial";
-			context.fillText("x", this.posX + 3, this.posY - 2 + XSIZE);
+			context.fillStyle = "red"; //Color of xBox.
+			context.fillRect(this.posX, this.posY, XSIZE, XSIZE); //Draw xBox.
+
+			context.lineWidth = 2; //Width of xBox border.
+			context.fillStyle = "black"; //Color of xBox border.
+			context.strokeRect(this.posX, this.posY, XSIZE, XSIZE); //Draw xBox border.
+
+			context.font = "20px Arial"; //Font & size.
+			context.fillText("x", this.posX + 3, this.posY - 2 + XSIZE); //Draw x in xBox.
 		}
 	}
 
+	/**Updates position of xBox. */
 	update(){
 		this.posX += this.iBrick.posX-this.startX;
 		this.startX = this.iBrick.posX;
@@ -754,6 +964,7 @@ class xBox {
 		this.startY = this.iBrick.posY;
 }
 
+/**Checks if xBox was clicked. */
 	checkClick(x, y){
 		if(this.posX < x && this.posX + XSIZE > x && this.posY < y && this.posY + XSIZE > y && !this.iBrick.spawner){
 			return true;
@@ -763,7 +974,18 @@ class xBox {
 	}
 }
 
+/**The little boxes at the tops and bottoms of bricks that are
+ * used to connect one brick to another. */
 class Node {
+	/**
+	 * @param {boolean} inNode True: node goes on top and is an input.
+	 * @param {brick} iBrick Brick the node is attatched to.
+	 * @param {number} posX 
+	 * @param {number} posY 
+	 * @param {number} startX 
+	 * @param {number} startY 
+	 * @param {number} id 
+	 */
 	constructor(inNode, iBrick, posX, posY, startX, startY, id) {
 		this.inNode = inNode,
 		this.iBrick = iBrick,
@@ -840,17 +1062,20 @@ class Node {
 				this.value = this.connectedNode.iBrick.out;
 				if(!(this.iBrick.brickType instanceof plateBrick))
 					this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
+					else
+					this.iBrick.brickType.under = this.connectedNode.iBrick.brickType.lastMetal;
 				this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
 				this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
 			}else{
 				if(!(this.iBrick.brickType instanceof plateBrick))
 					this.iBrick.brickType.lastMetal = null;
+					else
+					this.iBrick.brickType.under = null;
 				this.iBrick.brickType.surfaceArea = null;
 				this.iBrick.brickType.quantity = null;
 			}
 		}
 	}
-
 
 	connect(otherNode){
 		if(this.inNode){
@@ -871,6 +1096,8 @@ class Node {
 			this.value = this.connectedNode.iBrick.out;
 			if(!(this.iBrick.brickType instanceof plateBrick))
 				this.iBrick.brickType.lastMetal = this.connectedNode.iBrick.brickType.lastMetal;
+				else
+				this.iBrick.brickType.under = this.connectedNode.iBrick.brickType.lastMetal;
 			this.iBrick.brickType.surfaceArea = this.connectedNode.iBrick.brickType.surfaceArea;
 			this.iBrick.brickType.quantity = this.connectedNode.iBrick.brickType.quantity;
 		}else{
@@ -907,8 +1134,7 @@ class Node {
 	}
 }
 
-
-
+//Create header of spawner bricks.
 let brickArray = [new brick(SELECTORGAP, 5, new baseBrick(), true, 0),
 	new brick(SELECTORGAP*2 + BRICKWIDTH, 5, new plateBrick(), true, 1),
 	new brick(SELECTORGAP*3 + BRICKWIDTH*2, 5, new totalBrick(), true, 2),
@@ -942,7 +1168,9 @@ window.onload = function() {
 		submitButton.onclick = submit;
 		infoDiv = document.getElementById("infoIn");
 	draw();
+
 	function draw() {
+		let infoOut = document.getElementById("infoOut");
 		context.clearRect(0, 0, width, height);
 	
 		for(i in brickArray){
@@ -956,6 +1184,11 @@ window.onload = function() {
 				iBrick.draw(context);
 				iBrick.xBox.draw(context);
 			}
+		}
+		if(infoOut.firstChild)
+			infoOut.removeChild(infoOut.firstChild);
+		if(displayedBrick != undefined && displayedBrick.brickType.defaultMult != undefined){
+			displayedBrick.brickType.updateMultField();
 		}
 		context.lineWidth = 2;
 		context.beginPath();
@@ -990,7 +1223,6 @@ window.onload = function() {
 						newId = brickArray.length;
 						for(let i in brickArray){
 							if(brickArray[i] === null){
-								console.log(i + " is null.");
 								newId = i;
 								break;
 							}
@@ -1060,7 +1292,6 @@ window.onload = function() {
 					iBrick = brickArray[i];
 				}
 				for(i in iBrick.nodeArray){
-					console.log(selectedNode);
 					iNode = iBrick.nodeArray[i];
 					if(iNode != null && iNode != undefined && iNode.checkClick(mouseX, mouseY)
 					&& iNode.iBrick != selectedNode.iBrick && iNode.inNode != selectedNode.inNode){
